@@ -1,0 +1,22 @@
+---
+// 語義パネルの下に置く用例リスト。エンジニア側・一般側で同じ体裁を使う。
+// 区切り線と「用例」ラベルは、意味の説明文と用例を視覚的に分けるためのもの。
+interface Props {
+  items: string[];
+}
+
+const { items } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <div class="mt-4 border-t-2 pt-3">
+      <p class="font-head mb-1.5 text-xs font-black opacity-60">用例</p>
+      <ul class="space-y-1">
+        {items.map((example) => (
+          <li class="text-sm">「{example}」</li>
+        ))}
+      </ul>
+    </div>
+  )
+}

@@ -4,6 +4,7 @@ import EngineerSlider from "../components/EngineerSlider";
 import LevelText from "../components/LevelText.astro";
 import SiteLogo from "../components/SiteLogo.astro";
 import Layout from "../layouts/Layout.astro";
+import { TAGS } from "../lib/tags";
 
 const words = (await getCollection("words")).sort((a, b) =>
   a.data.reading.localeCompare(b.data.reading, "ja"),
@@ -27,20 +28,34 @@ const words = (await getCollection("words")).sort((a, b) =>
         words.map((word) => (
           <li class="bg-card border-4 shadow-lg">
             <a href={`/words/${word.id}`} class="block p-5">
-              <h2 class="font-head mb-3 text-2xl font-black">{word.data.term}</h2>
+              <div class="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-2">
+                <h2 class="font-head text-2xl font-black">{word.data.term}</h2>
+                {word.data.tags.length > 0 && (
+                  <ul class="flex flex-wrap gap-1.5">
+                    {word.data.tags.map((tag) => (
+                      <li
+                        class:list={[
+                          "border-2 px-2 py-0.5 text-xs font-black",
+                          TAGS[tag].world === "tech"
+                            ? "bg-engineer"
+                            : "bg-general",
+                        ]}
+                      >
+                        #{tag}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               <div class="grid gap-3 sm:grid-cols-2">
                 <div class="bg-engineer border-2 p-3">
-                  <p class="mb-1 text-xs font-black">
-                    エンジニア ／ {word.data.engineer.category}
-                  </p>
+                  <p class="mb-1 text-xs font-black">エンジニア</p>
                   <p class="text-sm leading-relaxed">
                     <LevelText levels={word.data.engineer.levels} />
                   </p>
                 </div>
                 <div class="bg-general border-2 p-3">
-                  <p class="mb-1 text-xs font-black">
-                    ふつう ／ {word.data.general.category}
-                  </p>
+                  <p class="mb-1 text-xs font-black">ふつう</p>
                   <p class="text-sm leading-relaxed">
                     {word.data.general.meaning}
                   </p>
