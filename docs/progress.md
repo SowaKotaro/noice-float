@@ -59,6 +59,20 @@
 - `--engineer` / `--general` は 2 つの語義パネル専用のトークン。
   どちらの視点かを色で固定するため、汎用の accent とは分けてある
 
+### データ構造：タグと用例
+
+- **タグは統制語彙**。許可語は `src/lib/tags.ts` の `TAGS` レジストリに集約し、
+  各タグに `group`（`field` = 分野 / `trait` = 語の性質・ネタ）と `description` を持たせる。
+  スキーマは `z.enum(TAG_NAMES)` で検証し、**未定義タグはビルドを止める**（部分列制約と同じ思想）。
+  検証済み：不正タグを置くと許可語の一覧つきでエラーが出る
+- タグ追加はレジストリ 1 箇所で完結。表示側（語ページ）も同じレジストリを引き、
+  `field` は塗り・`trait` は白抜きで軸を色分けし、`title` に description を出す
+- 旧タグ「初心者殺し」→ `落とし穴`、「飲食店で言うな」→ `別物` + 語自体の性質へ整理。
+  軸が混ざって「よくわからない」状態を解消した
+- **用例**：`engineer.examples` / `general.examples`（`string[]`, 既定 `[]`, 目安 2〜3 個）。
+  語ページの各パネル下に `src/components/Examples.astro` で「用例」として表示。
+  スライダーの段階変形とは無関係な静的テキスト
+
 ### エンジニア度スライダー（このプロジェクトの核）
 
 - `src/lib/subsequence.ts` — 部分列判定。`Intl.Segmenter` で書記素単位に分割するため絵文字が壊れない
@@ -128,7 +142,8 @@ HTML に入っているテキストは最上位段階の全文ひとつだけで
 ### 技術選定書に残っている未決事項
 
 - ドメイン取得（`noicefloat.dev` / `noicefloat.com` が候補）
-- カテゴリ体系（`engineer.category` / `general.category` の語彙統制）
+- カテゴリ体系（`engineer.category` / `general.category` の語彙統制）。
+  ※ `tags` は `src/lib/tags.ts` で統制済み。`category` はまだ自由記述
 - スライダーの UI 文言（「エンジニア度」という呼称でよいか）
 - 初期投入語のリスト
 - 辞書コンテンツのライセンス（コードの MIT と分けるか）

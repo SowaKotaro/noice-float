@@ -1,9 +1,11 @@
 ---
 import { getCollection, render } from "astro:content";
 import EngineerSlider from "../../components/EngineerSlider";
+import Examples from "../../components/Examples.astro";
 import LevelText from "../../components/LevelText.astro";
 import SiteLogo from "../../components/SiteLogo.astro";
 import Layout from "../../layouts/Layout.astro";
+import { TAGS } from "../../lib/tags";
 
 export async function getStaticPaths() {
   const words = await getCollection("words");
@@ -39,6 +41,7 @@ const { Content } = await render(word);
         <p class="leading-relaxed">
           <LevelText levels={word.data.engineer.levels} />
         </p>
+        <Examples items={word.data.engineer.examples} />
       </section>
 
       <section class="bg-general border-4 p-5 shadow-lg">
@@ -46,6 +49,7 @@ const { Content } = await render(word);
           ふつう ／ {word.data.general.category}
         </h2>
         <p class="leading-relaxed">{word.data.general.meaning}</p>
+        <Examples items={word.data.general.examples} />
       </section>
     </div>
 
@@ -53,7 +57,16 @@ const { Content } = await render(word);
       word.data.tags.length > 0 && (
         <ul class="mb-8 flex flex-wrap gap-2">
           {word.data.tags.map((tag) => (
-            <li class="bg-accent text-accent-foreground border-2 px-3 py-1 text-xs font-black">
+            <li
+              title={TAGS[tag].description}
+              class:list={[
+                "border-2 px-3 py-1 text-xs font-black",
+                // 分野タグは塗り、性質・ネタタグは白抜きで、軸の違いを色でも示す。
+                TAGS[tag].group === "field"
+                  ? "bg-accent text-accent-foreground"
+                  : "bg-card",
+              ]}
+            >
               #{tag}
             </li>
           ))}
