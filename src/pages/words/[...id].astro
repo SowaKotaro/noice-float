@@ -35,9 +35,7 @@ const { Content } = await render(word);
 
     <div class="mb-8 grid gap-5 sm:grid-cols-2">
       <section class="bg-engineer border-4 p-5 shadow-lg">
-        <h2 class="font-head mb-2 text-sm font-black">
-          エンジニア ／ {word.data.engineer.category}
-        </h2>
+        <h2 class="font-head mb-2 text-sm font-black">エンジニア</h2>
         <p class="leading-relaxed">
           <LevelText levels={word.data.engineer.levels} />
         </p>
@@ -45,9 +43,7 @@ const { Content } = await render(word);
       </section>
 
       <section class="bg-general border-4 p-5 shadow-lg">
-        <h2 class="font-head mb-2 text-sm font-black">
-          ふつう ／ {word.data.general.category}
-        </h2>
+        <h2 class="font-head mb-2 text-sm font-black">ふつう</h2>
         <p class="leading-relaxed">{word.data.general.meaning}</p>
         <Examples items={word.data.general.examples} />
       </section>
@@ -61,10 +57,8 @@ const { Content } = await render(word);
               title={TAGS[tag].description}
               class:list={[
                 "border-2 px-3 py-1 text-xs font-black",
-                // 分野タグは塗り、性質・ネタタグは白抜きで、軸の違いを色でも示す。
-                TAGS[tag].group === "field"
-                  ? "bg-accent text-accent-foreground"
-                  : "bg-card",
+                // タグの色を分野の世界に合わせる。tech=エンジニア緑／daily=ふつうピンク。
+                TAGS[tag].world === "tech" ? "bg-engineer" : "bg-general",
               ]}
             >
               #{tag}
