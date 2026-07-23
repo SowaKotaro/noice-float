@@ -44,16 +44,20 @@ const words = (await getCollection("words")).sort((a, b) =>
                   </ul>
                 )}
               </div>
-              {/* 重なった書類風のプレビュー。前面=エンジニア（しっかり相当）、
-                  背面=ふつうの見出しタブがのぞく。操作は詳細ページで。 */}
-              <div class="relative grid pt-7">
+              {/* 重なった書類風のプレビュー。2 枚とも本文を持つ完全なカードで、
+                  前面=エンジニア（しっかり相当）、背面=ふつうがずれてのぞく。
+                  操作は詳細ページで。 */}
+              <div class="relative grid pr-4 pb-6">
                 <div
-                  class="font-head col-start-1 row-start-1 z-10 -translate-y-7 translate-x-2 rotate-[1.6deg] self-start justify-self-start border-2 bg-general px-3 py-1.5 text-xs font-black whitespace-nowrap shadow"
+                  class="bg-general col-start-1 row-start-1 z-10 translate-x-4 translate-y-6 rotate-[2.4deg] scale-[0.97] border-2 p-4 shadow-md"
                 >
-                  ふつう <span aria-hidden="true">▲</span>
+                  <p class="mb-1 text-xs font-black">ふつう</p>
+                  <p class="text-sm leading-relaxed">
+                    {word.data.general.meaning}
+                  </p>
                 </div>
                 <div
-                  class="bg-engineer col-start-1 row-start-1 z-20 rotate-[-1deg] border-2 p-4 shadow-md"
+                  class="bg-engineer col-start-1 row-start-1 z-20 rotate-[-1.2deg] border-2 p-4 shadow-md"
                 >
                   <p class="mb-1 text-xs font-black">エンジニア</p>
                   <p class="text-sm leading-relaxed">
