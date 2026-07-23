@@ -4,38 +4,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * エンジニア度による説明文の変形。
- *
- * data-show を持つ断片は「その目盛りが列挙されているとき」だけ表示される。
- * html[data-eng] が未設定の場合（JS 無効時など）はどのルールにもマッチしないため、
- * もっともエンジニア寄りの全文がそのまま読める状態になる。
- */
-html[data-eng="0"] [data-show]:not([data-show~="0"]),
-html[data-eng="1"] [data-show]:not([data-show~="1"]),
-html[data-eng="2"] [data-show]:not([data-show~="2"]),
-html[data-eng="3"] [data-show]:not([data-show~="3"]),
-html[data-eng="4"] [data-show]:not([data-show~="4"]),
-html[data-eng="5"] [data-show]:not([data-show~="5"]),
-html[data-eng="6"] [data-show]:not([data-show~="6"]),
-html[data-eng="7"] [data-show]:not([data-show~="7"]),
-html[data-eng="8"] [data-show]:not([data-show~="8"]),
-html[data-eng="9"] [data-show]:not([data-show~="9"]),
-html[data-eng="10"] [data-show]:not([data-show~="10"]) {
-  opacity: 0;
-  display: none;
-}
-
-/* 先に薄くなってから、行が詰まる。 */
-[data-show] {
-  transition:
-    opacity 140ms ease-out,
-    display 140ms allow-discrete;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  [data-show] {
-    transition: none;
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }
 

@@ -1,7 +1,5 @@
 ---
 import { getCollection } from "astro:content";
-import EngineerSlider from "../components/EngineerSlider";
-import LevelText from "../components/LevelText.astro";
 import SiteLogo from "../components/SiteLogo.astro";
 import Layout from "../layouts/Layout.astro";
 import { TAGS } from "../lib/tags";
@@ -17,10 +15,9 @@ const words = (await getCollection("words")).sort((a, b) =>
       <h1 class="mb-3">
         <SiteLogo class="h-auto w-full" />
       </h1>
-      <p class="text-muted-foreground mb-6 font-bold">
+      <p class="text-muted-foreground font-bold">
         エンジニアと非エンジニアで意味の違う語を、両方の視点から引ける辞書。
       </p>
-      <EngineerSlider client:only="react" />
     </header>
 
     <ul class="space-y-6">
@@ -47,17 +44,20 @@ const words = (await getCollection("words")).sort((a, b) =>
                   </ul>
                 )}
               </div>
-              <div class="grid gap-3 sm:grid-cols-2">
-                <div class="bg-engineer border-2 p-3">
+              {/* 重なった書類風のプレビュー。前面=エンジニア（しっかり相当）、
+                  背面=ふつうの見出しタブがのぞく。操作は詳細ページで。 */}
+              <div class="relative grid pt-7">
+                <div
+                  class="font-head col-start-1 row-start-1 z-10 -translate-y-7 translate-x-2 rotate-[1.6deg] self-start justify-self-start border-2 bg-general px-3 py-1.5 text-xs font-black whitespace-nowrap shadow"
+                >
+                  ふつう <span aria-hidden="true">▲</span>
+                </div>
+                <div
+                  class="bg-engineer col-start-1 row-start-1 z-20 rotate-[-1deg] border-2 p-4 shadow-md"
+                >
                   <p class="mb-1 text-xs font-black">エンジニア</p>
                   <p class="text-sm leading-relaxed">
-                    <LevelText levels={word.data.engineer.levels} />
-                  </p>
-                </div>
-                <div class="bg-general border-2 p-3">
-                  <p class="mb-1 text-xs font-black">ふつう</p>
-                  <p class="text-sm leading-relaxed">
-                    {word.data.general.meaning}
+                    {word.data.engineer.levels[1]}
                   </p>
                 </div>
               </div>

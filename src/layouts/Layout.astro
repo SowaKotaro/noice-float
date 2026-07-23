@@ -1,6 +1,5 @@
 ---
 import { ClientRouter } from "astro:transitions";
-import { DEFAULT_LEVEL, STORAGE_KEY } from "../lib/levelize";
 import "../styles/global.css";
 
 interface Props {
@@ -22,18 +21,6 @@ const {
     <meta name="description" content={description} />
     <title>{title}</title>
     <ClientRouter />
-    <script
-      is:inline
-      define:vars={{ key: STORAGE_KEY, fallback: String(DEFAULT_LEVEL) }}
-    >
-      // ハイドレーションより前にエンジニア度を反映し、説明文のちらつきを防ぐ。
-      const applyStoredLevel = () => {
-        document.documentElement.dataset.eng =
-          localStorage.getItem(key) ?? fallback;
-      };
-      applyStoredLevel();
-      document.addEventListener("astro:after-swap", applyStoredLevel);
-    </script>
   </head>
   <body class="min-h-screen">
     <slot />

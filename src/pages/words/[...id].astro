@@ -1,8 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
-import EngineerSlider from "../../components/EngineerSlider";
-import Examples from "../../components/Examples.astro";
-import LevelText from "../../components/LevelText.astro";
+import MeaningCards from "../../components/MeaningCards";
 import SiteLogo from "../../components/SiteLogo.astro";
 import Layout from "../../layouts/Layout.astro";
 import { TAGS } from "../../lib/tags";
@@ -14,6 +12,7 @@ export async function getStaticPaths() {
 
 const { word } = Astro.props;
 const { Content } = await render(word);
+const hasBody = !!word.body?.trim();
 ---
 
 <Layout title={`${word.data.term} - そのフロート、アイス乗ってません！`}>
@@ -27,26 +26,14 @@ const { Content } = await render(word);
     </a>
 
     <h1 class="font-head mb-2 text-4xl font-black">{word.data.term}</h1>
-    <p class="text-muted-foreground mb-8 font-bold">{word.data.reading}</p>
+    <p class="text-muted-foreground mb-6 font-bold">{word.data.reading}</p>
 
     <div class="mb-8">
-      <EngineerSlider client:only="react" />
-    </div>
-
-    <div class="mb-8 grid gap-5 sm:grid-cols-2">
-      <section class="bg-engineer border-4 p-5 shadow-lg">
-        <h2 class="font-head mb-2 text-sm font-black">エンジニア</h2>
-        <p class="leading-relaxed">
-          <LevelText levels={word.data.engineer.levels} />
-        </p>
-        <Examples items={word.data.engineer.examples} />
-      </section>
-
-      <section class="bg-general border-4 p-5 shadow-lg">
-        <h2 class="font-head mb-2 text-sm font-black">ふつう</h2>
-        <p class="leading-relaxed">{word.data.general.meaning}</p>
-        <Examples items={word.data.general.examples} />
-      </section>
+      <MeaningCards
+        client:load
+        engineer={word.data.engineer}
+        general={word.data.general}
+      />
     </div>
 
     {
@@ -68,8 +55,12 @@ const { Content } = await render(word);
       )
     }
 
-    <div class="bg-card border-4 p-5 leading-loose">
-      <Content />
-    </div>
+    {
+      hasBody && (
+        <div class="bg-card border-4 p-5 leading-loose">
+          <Content />
+        </div>
+      )
+    }
   </div>
 </Layout>
