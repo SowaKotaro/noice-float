@@ -20,10 +20,11 @@ const TITLE: Record<Side, string> = { engineer: "エンジニア", general: "ふ
 const BG: Record<Side, string> = { engineer: "bg-engineer", general: "bg-general" };
 
 // 前面／背面の位置。この差分を transition-transform でアニメーションさせる。
-// 前面は右肩上がり（反時計回り）、背面は右肩下がり（時計回り）＋わずかに上。
-// 逆向きの傾きで左上のタイトルが上下にずれ、両方のタイトルが見える。
-const POS_FRONT = "z-20 translate-x-0 translate-y-0 rotate-[-2deg] scale-100";
-const POS_BACK = "z-10 -translate-y-5 rotate-[2deg] scale-[0.98]";
+// 2 枚は同サイズ（グリッド stretch で合同）。前面＝右肩上がり（反時計回り）、
+// 背面＝右肩下がり（時計回り）で、回転差により背面が四隅からはみ出す。
+// 背面をさらに左上へ寄せて、左上タイトルの余裕・左辺・右下のはみ出しを出す。
+const POS_FRONT = "z-20 translate-x-0 translate-y-0 rotate-[-3deg]";
+const POS_BACK = "z-10 -translate-x-3.5 -translate-y-2 rotate-[3deg]";
 
 interface Props {
   engineer: { levels: string[]; examples: string[] };
@@ -142,7 +143,8 @@ export default function MeaningCards({
   };
 
   return (
-    <div className="relative grid px-2 pt-7 pb-4">
+    // 余白は背面カードのはみ出し分の逃げ。px-8＝左右, pt-9＝上（タイトル）, pb-6＝右下。
+    <div className="relative grid px-8 pt-9 pb-6">
       {card("engineer")}
       {card("general")}
     </div>
