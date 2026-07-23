@@ -1,0 +1,169 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * エンジニア度による説明文の変形。
+ *
+ * data-show を持つ断片は「その目盛りが列挙されているとき」だけ表示される。
+ * html[data-eng] が未設定の場合（JS 無効時など）はどのルールにもマッチしないため、
+ * もっともエンジニア寄りの全文がそのまま読める状態になる。
+ */
+html[data-eng="0"] [data-show]:not([data-show~="0"]),
+html[data-eng="1"] [data-show]:not([data-show~="1"]),
+html[data-eng="2"] [data-show]:not([data-show~="2"]),
+html[data-eng="3"] [data-show]:not([data-show~="3"]),
+html[data-eng="4"] [data-show]:not([data-show~="4"]),
+html[data-eng="5"] [data-show]:not([data-show~="5"]),
+html[data-eng="6"] [data-show]:not([data-show~="6"]),
+html[data-eng="7"] [data-show]:not([data-show~="7"]),
+html[data-eng="8"] [data-show]:not([data-show~="8"]),
+html[data-eng="9"] [data-show]:not([data-show~="9"]),
+html[data-eng="10"] [data-show]:not([data-show~="10"]) {
+  opacity: 0;
+  display: none;
+}
+
+/* 先に薄くなってから、行が詰まる。 */
+[data-show] {
+  transition:
+    opacity 140ms ease-out,
+    display 140ms allow-discrete;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-show] {
+    transition: none;
+  }
+}
+
+/*
+ * RetroUI のテーマ機構。
+ * 影は「ぼかしのない実体のあるオフセット」で、色は枠線と同じ。角丸は 0。
+ * ネオブルータリズムの見た目はこの 2 つでほぼ決まる。
+ */
+@theme inline {
+  --radius: 0;
+
+  --shadow-xs: 1px 1px 0 0 var(--border);
+  --shadow-sm: 2px 2px 0 0 var(--border);
+  --shadow: 3px 3px 0 0 var(--border);
+  --shadow-md: 4px 4px 0 0 var(--border);
+  --shadow-lg: 6px 6px 0 0 var(--border);
+  --shadow-xl: 10px 10px 0 1px var(--border);
+  --shadow-2xl: 16px 16px 0 1px var(--border);
+
+  --font-sans: var(--font-sans);
+  --font-head: var(--font-head);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-hover: var(--accent-hover);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* 2 つの語義パネル。どちらの視点かを色で固定する。 */
+  --color-engineer: var(--engineer);
+  --color-general: var(--general);
+}
+
+/*
+ * パレットはタイトルロゴから抽出した色に揃えてある。
+ * ネイビー #000C31 / ピンク #FD4F97 / 黄緑 #BFF623 / 赤 #FC221E は
+ * すべて src/assets/noicefloat-logo.png の最頻色。
+ */
+:root {
+  /* 本文フォントは暫定。見出し用の自己ホストは docs/progress.md の未着手 4 番。 */
+  --font-sans:
+    ui-sans-serif, system-ui, "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "BIZ UDPGothic", Meiryo, sans-serif;
+  --font-head: var(--font-sans);
+
+  --background: #fff6e5;
+  --foreground: #000c31;
+  --card: #ffffff;
+  --card-foreground: #000c31;
+  --popover: #ffffff;
+  --popover-foreground: #000c31;
+
+  --primary: #fd4f97;
+  --primary-foreground: #ffffff;
+  --primary-hover: #e93a83;
+  --secondary: #000c31;
+  --secondary-foreground: #fff6e5;
+  --secondary-hover: #001a55;
+
+  --muted: #efe4d2;
+  --muted-foreground: #5b5545;
+  --accent: #bff623;
+  --accent-foreground: #000c31;
+  --accent-hover: #ade30f;
+  --destructive: #fc221e;
+  --destructive-foreground: #ffffff;
+
+  --border: #000c31;
+  --input: #ffffff;
+  --ring: #fd4f97;
+
+  --engineer: #ddf9a0;
+  --general: #ffd6e8;
+}
+
+.dark {
+  --background: #10132b;
+  --foreground: #fff6e5;
+  --card: #191d3c;
+  --card-foreground: #fff6e5;
+  --popover: #191d3c;
+  --popover-foreground: #fff6e5;
+
+  --primary: #fd4f97;
+  --primary-foreground: #10132b;
+  --primary-hover: #ff6ba8;
+  --secondary: #fff6e5;
+  --secondary-foreground: #10132b;
+  --secondary-hover: #ffffff;
+
+  --muted: #2a2f52;
+  --muted-foreground: #a9a596;
+  --accent: #bff623;
+  --accent-foreground: #10132b;
+  --accent-hover: #d0ff4d;
+  --destructive: #fc221e;
+  --destructive-foreground: #ffffff;
+
+  --border: #fff6e5;
+  --input: #191d3c;
+  --ring: #fd4f97;
+
+  --engineer: #4d6b1a;
+  --general: #7a2b52;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}

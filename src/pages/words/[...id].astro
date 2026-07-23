@@ -1,0 +1,68 @@
+---
+import { getCollection, render } from "astro:content";
+import EngineerSlider from "../../components/EngineerSlider";
+import LevelText from "../../components/LevelText.astro";
+import SiteLogo from "../../components/SiteLogo.astro";
+import Layout from "../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const words = await getCollection("words");
+  return words.map((word) => ({ params: { id: word.id }, props: { word } }));
+}
+
+const { word } = Astro.props;
+const { Content } = await render(word);
+---
+
+<Layout title={`${word.data.term} - そのフロート、アイス乗ってません！`}>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <a href="/" class="mb-8 inline-block" title="一覧へ">
+      <SiteLogo
+        widths={[240, 480]}
+        sizes="240px"
+        class="h-auto w-[180px] sm:w-[240px]"
+      />
+    </a>
+
+    <h1 class="font-head mb-2 text-4xl font-black">{word.data.term}</h1>
+    <p class="text-muted-foreground mb-8 font-bold">{word.data.reading}</p>
+
+    <div class="mb-8">
+      <EngineerSlider client:only="react" />
+    </div>
+
+    <div class="mb-8 grid gap-5 sm:grid-cols-2">
+      <section class="bg-engineer border-4 p-5 shadow-lg">
+        <h2 class="font-head mb-2 text-sm font-black">
+          エンジニア ／ {word.data.engineer.category}
+        </h2>
+        <p class="leading-relaxed">
+          <LevelText levels={word.data.engineer.levels} />
+        </p>
+      </section>
+
+      <section class="bg-general border-4 p-5 shadow-lg">
+        <h2 class="font-head mb-2 text-sm font-black">
+          ふつう ／ {word.data.general.category}
+        </h2>
+        <p class="leading-relaxed">{word.data.general.meaning}</p>
+      </section>
+    </div>
+
+    {
+      word.data.tags.length > 0 && (
+        <ul class="mb-8 flex flex-wrap gap-2">
+          {word.data.tags.map((tag) => (
+            <li class="bg-accent text-accent-foreground border-2 px-3 py-1 text-xs font-black">
+              #{tag}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+
+    <div class="bg-card border-4 p-5 leading-loose">
+      <Content />
+    </div>
+  </div>
+</Layout>

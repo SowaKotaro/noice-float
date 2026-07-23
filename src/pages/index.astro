@@ -1,0 +1,55 @@
+---
+import { getCollection } from "astro:content";
+import EngineerSlider from "../components/EngineerSlider";
+import LevelText from "../components/LevelText.astro";
+import SiteLogo from "../components/SiteLogo.astro";
+import Layout from "../layouts/Layout.astro";
+
+const words = (await getCollection("words")).sort((a, b) =>
+  a.data.reading.localeCompare(b.data.reading, "ja"),
+);
+---
+
+<Layout title="そのフロート、アイス乗ってません！">
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <header class="mb-10">
+      <h1 class="mb-3">
+        <SiteLogo class="h-auto w-full" />
+      </h1>
+      <p class="text-muted-foreground mb-6 font-bold">
+        エンジニアと非エンジニアで意味の違う語を、両方の視点から引ける辞書。
+      </p>
+      <EngineerSlider client:only="react" />
+    </header>
+
+    <ul class="space-y-6">
+      {
+        words.map((word) => (
+          <li class="bg-card border-4 shadow-lg">
+            <a href={`/words/${word.id}`} class="block p-5">
+              <h2 class="font-head mb-3 text-2xl font-black">{word.data.term}</h2>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <div class="bg-engineer border-2 p-3">
+                  <p class="mb-1 text-xs font-black">
+                    エンジニア ／ {word.data.engineer.category}
+                  </p>
+                  <p class="text-sm leading-relaxed">
+                    <LevelText levels={word.data.engineer.levels} />
+                  </p>
+                </div>
+                <div class="bg-general border-2 p-3">
+                  <p class="mb-1 text-xs font-black">
+                    ふつう ／ {word.data.general.category}
+                  </p>
+                  <p class="text-sm leading-relaxed">
+                    {word.data.general.meaning}
+                  </p>
+                </div>
+              </div>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Layout>

@@ -1,0 +1,20 @@
+---
+import { levelize, showAttr } from "../lib/levelize";
+
+interface Props {
+  levels: string[];
+}
+
+const { levels } = Astro.props;
+const segments = levelize(levels);
+---
+
+{
+  segments.map((segment) =>
+    segment.showFrom === 0 ? (
+      segment.text
+    ) : (
+      <span data-show={showAttr(segment.showFrom)}>{segment.text}</span>
+    ),
+  )
+}

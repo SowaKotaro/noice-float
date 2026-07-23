@@ -1,0 +1,31 @@
+---
+// サイトのタイトルロゴ。alt がそのままページの見出しテキストになるため、
+// h1 の中に置くときも別途テキストを添える必要はない。
+import { Image } from "astro:assets";
+import logo from "../assets/noicefloat-logo.png";
+
+interface Props {
+  /** srcset に並べる候補幅。元画像は 1530px なのでこれを超えても増えない。 */
+  widths?: number[];
+  /** レイアウト上の表示幅をブラウザに伝える。 */
+  sizes?: string;
+  loading?: "eager" | "lazy";
+  class?: string;
+}
+
+const {
+  widths = [320, 480, 736, 1024, 1472],
+  sizes = "(max-width: 48rem) calc(100vw - 2rem), 736px",
+  loading = "eager",
+  class: className,
+} = Astro.props;
+---
+
+<Image
+  src={logo}
+  alt="そのフロート、アイス乗ってません！"
+  widths={widths}
+  sizes={sizes}
+  loading={loading}
+  class={className}
+/>
