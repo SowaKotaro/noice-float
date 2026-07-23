@@ -6,34 +6,34 @@
 - 技術選定の全体像と決定理由: `docs/tech-selection.md`
 - 現在地・残タスク・保留中の判断: `docs/progress.md`
 
-## このプロジェクト固有の絶対ルール
+## このプロジェクト固有の設計ルール
 
-`src/content/words/*.md` の `engineer.levels` は、**後の要素が直前の要素の部分列**で
-なければならない（順序を保った文字の削除だけで到達できること）。助詞の置換や語順の
-入れ替えは不可。たとえば「32bit **を**使って」を下位段階で「32bit **で**」には
-できない。
+**意味の表示は 2 枚の重なるカードで行う**（`src/components/MeaningCards.tsx`）。
+書類が重なったように前後に並べる。2 枚とも本文を持つ完全なカードで、背面はずれて
+のぞく。背面カード面のクリック（または前面見出しの ⇄）で前後が入れ替わり、
+`transition-transform` で滑って動く。デフォルト前面はエンジニア。
 
-違反すると `src/content.config.ts` の `superRefine` がビルドを停止させる。
+エンジニア視点の説明は **`engineer.levels` に必ず 3 段階**で用意する。
+順に **さらっと / しっかり / がっつり**（後ろほど技術度が高い）。各段階は独立した全文で、
+**部分列などの制約はない**（自然な日本語でよい）。カード内の 3 つのボタンで
+`levels[0..2]` を切り替える。`src/content.config.ts` が `length(3)` を検証し、
+3 個でなければビルドが止まる。
 
-この制約があるおかげで、HTML に出力される説明文は `levels[0]` の全文ひとつだけで済み、
-消える箇所だけが `<span data-show>` に切り分けられる。サイト全体の設計がこの性質に
-乗っているため、崩さないこと。
-
-説明文の変形は CSS が担当し、JavaScript は `<html data-eng="N">` を書き換えるだけ。
-この役割分担も設計の要なので、React 側で表示・非表示を制御する方向へ倒さないこと。
+> 旧方式（部分列制約＋`data-eng`/`data-show` の CSS 切替＋グローバルスライダー）は
+> 廃止した。切替は MeaningCards 島の React 状態が担う。過去メモに出てくる
+> `subsequence.ts` / `levelize.ts` / `LevelText.astro` / `EngineerSlider.tsx` は
+> もう存在しない。
 
 ## 主要ファイル
 
 | パス | 役割 |
 |---|---|
-| `src/lib/subsequence.ts` | 部分列判定（`Intl.Segmenter` で書記素単位） |
-| `src/lib/levelize.ts` | 差分から断片を切り出し、0〜10 の共通スケールへ配分 |
-| `src/content.config.ts` | Zod スキーマと部分列制約の検証 |
-| `src/components/LevelText.astro` | 断片を `<span data-show>` として描画 |
-| `src/components/EngineerSlider.tsx` | 唯一の状態を持つ island |
-| `src/styles/global.css` | 表示切替の CSS と、RetroUI テーマ（配色・影・角丸） |
+| `src/content.config.ts` | Zod スキーマ（`engineer.levels` は 3 段階、タグは統制語彙） |
+| `src/components/MeaningCards.tsx` | 重なる意味カード＋段階切替ボタン。唯一の状態を持つ island |
+| `src/lib/tags.ts` | タグの統制語彙（tech/daily の 2 世界）。未定義タグはビルド停止 |
 | `src/components/ui/` | shadcn CLI で取り込んだ RetroUI コンポーネント。手で書き換えてよい |
 | `src/components/SiteLogo.astro` | タイトルロゴ。`alt` が見出しテキストを兼ねる |
+| `src/styles/global.css` | RetroUI テーマ（配色・影・角丸） |
 
 配色はハードコードせず、`global.css` の CSS 変数（`bg-card` / `border-4` /
 `shadow-lg` / `bg-engineer` / `bg-general`）を使うこと。値はタイトルロゴから抽出してある。
