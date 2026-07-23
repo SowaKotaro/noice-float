@@ -45,11 +45,11 @@ const words = (await getCollection("words")).sort((a, b) =>
                 )}
               </div>
               {/* 重なった書類風のプレビュー。2 枚とも本文を持つ完全なカードで、
-                  前面=エンジニア（しっかり相当）、背面=ふつうがずれてのぞく。
-                  操作は詳細ページで。 */}
-              <div class="relative grid pr-4 pb-6">
+                  前面=エンジニア（右肩上がり）、背面=ふつう（右肩下がり）が上にずれ、
+                  両方の左上タイトルがのぞく。操作は詳細ページで。 */}
+              <div class="relative grid px-2 pt-7 pb-4">
                 <div
-                  class="bg-general col-start-1 row-start-1 z-10 translate-x-4 translate-y-6 rotate-[2.4deg] scale-[0.97] border-2 p-4 shadow-md"
+                  class="bg-general col-start-1 row-start-1 z-10 -translate-y-5 rotate-[2deg] scale-[0.98] border-2 p-4 shadow-md"
                 >
                   <p class="mb-1 text-xs font-black">ふつう</p>
                   <p class="text-sm leading-relaxed">
@@ -57,7 +57,7 @@ const words = (await getCollection("words")).sort((a, b) =>
                   </p>
                 </div>
                 <div
-                  class="bg-engineer col-start-1 row-start-1 z-20 rotate-[-1.2deg] border-2 p-4 shadow-md"
+                  class="bg-engineer col-start-1 row-start-1 z-20 rotate-[-2deg] border-2 p-4 shadow-md"
                 >
                   <p class="mb-1 text-xs font-black">エンジニア</p>
                   <p class="text-sm leading-relaxed">
