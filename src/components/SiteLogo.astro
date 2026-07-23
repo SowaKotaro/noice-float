@@ -5,7 +5,7 @@ import { Image } from "astro:assets";
 import logo from "../assets/noicefloat-logo.png";
 
 interface Props {
-  /** srcset に並べる候補幅。元画像は 1530px なのでこれを超えても増えない。 */
+  /** srcset に並べる候補幅。元画像は 927px なのでこれを超えても増えない。 */
   widths?: number[];
   /** レイアウト上の表示幅をブラウザに伝える。 */
   sizes?: string;
@@ -14,7 +14,7 @@ interface Props {
 }
 
 const {
-  widths = [320, 480, 736, 1024, 1472],
+  widths = [320, 480, 736, 927],
   sizes = "(max-width: 48rem) calc(100vw - 2rem), 736px",
   loading = "eager",
   class: className,
