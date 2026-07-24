@@ -21,13 +21,14 @@
 @theme inline {
   --radius: 0;
 
+  /* オフセット量は参考の 2 / 3 / 4 / 10 / 14px に合わせてある。 */
   --shadow-xs: 1px 1px 0 0 var(--border);
   --shadow-sm: 2px 2px 0 0 var(--border);
   --shadow: 3px 3px 0 0 var(--border);
   --shadow-md: 4px 4px 0 0 var(--border);
   --shadow-lg: 6px 6px 0 0 var(--border);
-  --shadow-xl: 10px 10px 0 1px var(--border);
-  --shadow-2xl: 16px 16px 0 1px var(--border);
+  --shadow-xl: 10px 10px 0 0 var(--border);
+  --shadow-2xl: 14px 14px 0 0 var(--border);
 
   --font-sans: var(--font-sans);
   --font-head: var(--font-head);
@@ -61,9 +62,13 @@
 }
 
 /*
- * パレットはタイトルロゴから抽出した色に揃えてある。
- * ネイビー #000C31 / ピンク #FD4F97 / 黄緑 #BFF623 / 赤 #FC221E は
- * すべて src/assets/noicefloat-logo.png の最頻色。
+ * パレットは `refs/NeoBrutalismCards.tsx` の配色をそのまま採用している。
+ * 紫 violet-300 #C4B5FD（下地）/ 青緑 #4ECDC4（エンジニア）/ 黄 #FFD166（ふつう）/
+ * 赤 #FF6B6B（差し色）/ 枠線と文字は純黒 #000000 / 面は純白 #FFFFFF。
+ * ドットは参考どおり #00000033 を 20px 間隔。
+ *
+ * ※ 以前はタイトルロゴ（ネイビー/ピンク/黄緑）から抽出した色を使っていたが、
+ *   「参考をそのまま真似する」方針に切り替えたため差し替えた。
  */
 :root {
   /* 本文フォントは暫定。見出し用の自己ホストは docs/progress.md の未着手 4 番。 */
@@ -72,34 +77,37 @@
     "BIZ UDPGothic", Meiryo, sans-serif;
   --font-head: var(--font-sans);
 
-  --background: #fff6e5;
-  --foreground: #000c31;
+  --background: #c4b5fd;
+  --foreground: #000000;
   --card: #ffffff;
-  --card-foreground: #000c31;
+  --card-foreground: #000000;
   --popover: #ffffff;
-  --popover-foreground: #000c31;
+  --popover-foreground: #000000;
 
-  --primary: #fd4f97;
+  --primary: #ff6b6b;
   --primary-foreground: #ffffff;
-  --primary-hover: #e93a83;
-  --secondary: #000c31;
-  --secondary-foreground: #fff6e5;
-  --secondary-hover: #001a55;
+  --primary-hover: #f25555;
+  --secondary: #000000;
+  --secondary-foreground: #ffffff;
+  --secondary-hover: #1a1a1a;
 
-  --muted: #efe4d2;
-  --muted-foreground: #5b5545;
-  --accent: #bff623;
-  --accent-foreground: #000c31;
-  --accent-hover: #ade30f;
-  --destructive: #fc221e;
+  --muted: #ddd6fe;
+  --muted-foreground: #3f3a52;
+  --accent: #4ecdc4;
+  --accent-foreground: #000000;
+  --accent-hover: #3bb8af;
+  --destructive: #ff6b6b;
   --destructive-foreground: #ffffff;
 
-  --border: #000c31;
+  --border: #000000;
   --input: #ffffff;
-  --ring: #fd4f97;
+  --ring: #000000;
 
-  --engineer: #ddf9a0;
-  --general: #ffd6e8;
+  --engineer: #4ecdc4;
+  --general: #ffd166;
+
+  /* 背景に敷くドット。参考の #00000033 をそのまま。 */
+  --dot: #00000033;
 }
 
 .dark {
@@ -131,13 +139,21 @@
 
   --engineer: #4d6b1a;
   --general: #7a2b52;
+
+  --dot: color-mix(in srgb, var(--border) 10%, transparent);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  /*
+   * 紙面ではなく「方眼のドット」の上に書類（カード）を置く、という画面構成。
+   * ネオブルータリズムの定番で、カードのオフセット影が浮いて見える効果がある。
+   */
   body {
     @apply bg-background text-foreground font-sans;
+    background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+    background-size: 20px 20px;
   }
 }

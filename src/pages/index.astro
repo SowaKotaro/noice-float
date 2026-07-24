@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import MeaningCards from "../components/MeaningCards";
 import SiteLogo from "../components/SiteLogo.astro";
 import Layout from "../layouts/Layout.astro";
 import { TAGS } from "../lib/tags";
@@ -10,62 +11,46 @@ const words = (await getCollection("words")).sort((a, b) =>
 ---
 
 <Layout title="そのフロート、アイス乗ってません！">
-  <div class="mx-auto max-w-3xl px-4 py-10">
-    <header class="mb-10">
+  <div class="mx-auto max-w-5xl px-4 py-10 sm:px-8">
+    <header class="mb-8">
       <h1 class="mb-3">
         <SiteLogo class="h-auto w-full" />
       </h1>
-      <p class="text-muted-foreground font-bold">
+      <p class="font-bold text-black">
         エンジニアと非エンジニアで意味の違う語を、両方の視点から引ける辞書。
       </p>
     </header>
 
-    <ul class="space-y-6">
+    {/* 一覧は操作なしの静的プレビュー。カード全体が語ページへのリンク。
+        前面は語ページと同じ ENGINEER 側で揃えてある。 */}
+    <ul class="flex flex-wrap justify-center gap-x-14 gap-y-10">
       {
         words.map((word) => (
-          <li class="bg-card border-4 shadow-lg">
-            <a href={`/words/${word.id}`} class="block p-5">
-              <div class="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-2">
-                <h2 class="font-head text-2xl font-black">{word.data.term}</h2>
-                {word.data.tags.length > 0 && (
-                  <ul class="flex flex-wrap gap-1.5">
-                    {word.data.tags.map((tag) => (
-                      <li
-                        class:list={[
-                          "border-2 px-2 py-0.5 text-xs font-black",
-                          TAGS[tag].world === "tech"
-                            ? "bg-engineer"
-                            : "bg-general",
-                        ]}
-                      >
-                        #{tag}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-              {/* 重なった書類風のプレビュー。2 枚とも完全なカードで、前面=エンジニア
-                  （右肩上がり）、背面=ふつう（右肩下がり）。回転差で背面が四隅から
-                  はみ出し、左上タイトルが両方見える。操作は詳細ページで。 */}
-              <div class="relative grid px-7 pt-8 pb-6">
-                <div
-                  class="bg-general col-start-1 row-start-1 z-10 -translate-x-3.5 -translate-y-2 rotate-[3deg] border-2 p-4 shadow-md"
-                >
-                  <p class="mb-1 text-xs font-black">ふつう</p>
-                  <p class="text-sm leading-relaxed">
-                    {word.data.general.meaning}
-                  </p>
-                </div>
-                <div
-                  class="bg-engineer col-start-1 row-start-1 z-20 rotate-[-3deg] border-2 p-4 shadow-md"
-                >
-                  <p class="mb-1 text-xs font-black">エンジニア</p>
-                  <p class="text-sm leading-relaxed">
-                    {word.data.engineer.levels[1]}
-                  </p>
-                </div>
-              </div>
-            </a>
+          <li class="w-[320px] sm:w-[560px]">
+            <MeaningCards
+              href={`/words/${word.id}`}
+              term={word.data.term}
+              reading={word.data.reading}
+              engineer={word.data.engineer}
+              general={word.data.general}
+            />
+            {word.data.tags.length > 0 && (
+              <ul class="mt-12 flex flex-wrap gap-2">
+                {word.data.tags.map((tag) => (
+                  <li
+                    title={TAGS[tag].description}
+                    class:list={[
+                      "border-2 border-black px-2 py-0.5 text-xs font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+                      TAGS[tag].world === "tech"
+                        ? "bg-[#4ECDC4]"
+                        : "bg-[#FFD166]",
+                    ]}
+                  >
+                    #{tag}
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))
       }
