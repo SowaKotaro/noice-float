@@ -4,6 +4,28 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * タイトルロゴ専用フォント。Dela Gothic One（SIL OFL 1.1）を、ロゴに出る
+ * 17 文字だけへ削った woff2（1.9KB）。生成は `scripts/subset-logo-font.py`。
+ * ライセンス全文は `public/fonts/OFL.txt`（再配布に必要なので消さないこと）。
+ *
+ * **`font-weight` を `100 900` と宣言しているのは意図的**。実体は単一ウェイトだが、
+ * こう書くとブラウザは「900 もこの face が持っている」と解釈するため、
+ * `font-black` を当てても**合成ボールドが掛からない**（400 と 900 で字幅が
+ * 同じであることを確認済み）。おかげでロゴ側に `font-black` を残しておけて、
+ * 万一 woff2 が読めなかったときのフォールバックが太いゴシックのままになる。
+ *
+ * `font-display: block` は、細いフォールバックで一瞬出てから太字に化ける
+ * ちらつきを避けるため（1.9KB なので待ち時間はごく短い）。
+ */
+@font-face {
+  font-family: "Dela Gothic One Subset";
+  src: url("/fonts/dela-gothic-one-logo.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -32,6 +54,7 @@
 
   --font-sans: var(--font-sans);
   --font-head: var(--font-head);
+  --font-logo: var(--font-logo);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -76,6 +99,8 @@
     ui-sans-serif, system-ui, "Hiragino Kaku Gothic ProN", "Noto Sans JP",
     "BIZ UDPGothic", Meiryo, sans-serif;
   --font-head: var(--font-sans);
+  /* タイトルロゴだけが使う。フォールバックは太めの指定に寄せてある。 */
+  --font-logo: "Dela Gothic One Subset", var(--font-sans);
 
   --background: #c4b5fd;
   --foreground: #000000;

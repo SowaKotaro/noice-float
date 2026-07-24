@@ -1,31 +1,78 @@
 ---
-// サイトのタイトルロゴ。alt がそのままページの見出しテキストになるため、
-// h1 の中に置くときも別途テキストを添える必要はない。
-import { Image } from "astro:assets";
-import logo from "../assets/noicefloat-logo.png";
+// サイトのタイトルロゴ。画像をやめ、RetroUI のテーマ（純黒の枠線・ぼかしのない
+// オフセット影・角丸 0）で文字を組んでいる。
+//
+// **書体は Dela Gothic One のサブセット**（`--font-logo`／global.css の @font-face）。
+// 実体は単一ウェイトだが @font-face が `font-weight: 100 900` を名乗っているので、
+// `font-black` を当てても合成ボールドは掛からない。この指定は**フォールバック用**
+// （woff2 が読めなかったときにシステムのゴシックを太く出すため）なので消さないこと。
+//
+// **寸法はすべて em で書いてある**ので、置く側が font-size を決めるだけで拡縮できる。
+//   ヘッダー … text-[16px] sm:text-[19px]
+//   トップの見出し … text-[32px] sm:text-[46px]
+// px を混ぜると小さいほうで破綻するので、新しく要素を足すときも em で書くこと。
+//
+// **横長のロックアップで、縦横比はおよそ 5 : 2**（実測 2.57 : 1・ユーザー指示）。
+// 大きい語（フロート／アイス）を軸に、小さい語（その／乗ってません！）で行幅を
+// 揃えている。比率は次の 3 つで釣り合わせてあるので、文言や要素を足したら
+// 計測用のページを一時的に置いて（`getBoundingClientRect` を出すだけでよい）測り直すこと。
+//   - CHIP の上下パディング（厚いほど縦に伸びて比率が締まる）
+//   - 小さい側の text-[0.5em] / text-[0.46em]（小さいほど横が縮む）
+//   - チップの数（1 つ増えるとパディング＋枠＋隙間のぶん横に伸びる）
+//
+// 文字そのものなので、h1 の中に置けばそれが見出しテキストになる（旧・画像版の
+// alt と同じ役割）。読み上げは「その / フロート、/ アイス / 乗ってません / ！」。
+import { IceCreamCone } from "lucide-react";
 
 interface Props {
-  /** srcset に並べる候補幅。元画像は 927px なのでこれを超えても増えない。 */
-  widths?: number[];
-  /** レイアウト上の表示幅をブラウザに伝える。 */
-  sizes?: string;
-  loading?: "eager" | "lazy";
   class?: string;
 }
 
-const {
-  widths = [320, 480, 736, 927],
-  sizes = "(max-width: 48rem) calc(100vw - 2rem), 736px",
-  loading = "eager",
-  class: className,
-} = Astro.props;
+const { class: className } = Astro.props;
+
+// 付箋・カードと同じ作り（黒枠＋右下へのオフセット影）を em で表したもの。
+// **display は持たせない**（各チップ側で指定する）。CHIP に inline-block を入れると
+// アイスのチップの inline-flex とぶつかり、Tailwind の出力順しだいで負ける。
+// 上下の余白が厚いのは、5 : 2 に収めるため。薄くすると横に伸びて間延びする。
+const CHIP =
+  "border-[0.05em] border-black px-[0.22em] pt-[0.26em] pb-[0.2em] shadow-[0.07em_0.07em_0_0_#000]";
 ---
 
-<Image
-  src={logo}
-  alt="そのフロート、アイス乗ってません！"
-  widths={widths}
-  sizes={sizes}
-  loading={loading}
-  class={className}
-/>
+<span
+  class:list={[
+    "inline-flex flex-col items-start font-logo font-black leading-none text-black",
+    className,
+  ]}
+>
+  <span class="flex items-end gap-[0.08em]">
+    <span class:list={[CHIP, "inline-block -rotate-3 bg-white text-[0.5em]"]}>
+      その
+    </span>
+    <span class:list={[CHIP, "inline-block rotate-1 bg-[#4ECDC4]"]}>
+      フロート、
+    </span>
+  </span>
+
+  <span class="mt-[0.06em] flex items-end gap-[0.08em]">
+    <span
+      class:list={[
+        CHIP,
+        "inline-flex -rotate-2 items-center gap-[0.06em] bg-[#FFD166]",
+      ]}
+    >
+      <IceCreamCone
+        className="size-[0.75em]"
+        strokeWidth={2.5}
+        aria-hidden="true"
+      />
+      アイス
+    </span>
+    {/* 「！」は独立したチップにせず黒帯に取り込んである。チップを 1 つ減らすと
+        その分だけ行が短くなり、5 : 2 に収まる。赤はここで効かせる。 */}
+    <span
+      class:list={[CHIP, "inline-block rotate-1 bg-black text-[0.46em] text-white"]}
+    >
+      乗ってません<span class="text-[1.5em] text-[#FF6B6B]">！</span>
+    </span>
+  </span>
+</span>

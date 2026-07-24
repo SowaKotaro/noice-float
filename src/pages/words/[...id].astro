@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import MeaningCards from "../../components/MeaningCards";
-import SiteLogo from "../../components/SiteLogo.astro";
+import { buttonVariants } from "../../components/ui/button";
 import Layout from "../../layouts/Layout.astro";
 import { TAGS } from "../../lib/tags";
 
@@ -17,15 +17,8 @@ const hasBody = !!word.body?.trim();
 
 <Layout title={`${word.data.term} - そのフロート、アイス乗ってません！`}>
   <div class="mx-auto max-w-3xl px-4 py-10 sm:px-8">
-    <a href="/" class="inline-block" title="一覧へ">
-      <SiteLogo
-        widths={[240, 480]}
-        sizes="240px"
-        class="h-auto w-[180px] sm:w-[240px]"
-      />
-    </a>
-
-    {/* 語名・読みはカードの中にある（GENERAL カードの大見出しが h1）。 */}
+    {/* ロゴはヘッダーにあるので、ここはカードから始める。
+        語名・読みはカードの中にある（GENERAL カードの大見出しが h1）。 */}
     <MeaningCards
       client:load
       term={word.data.term}
@@ -60,5 +53,11 @@ const hasBody = !!word.body?.trim();
         </div>
       )
     }
+
+    <div class="mt-14 flex justify-center">
+      <a href="/#words" class={buttonVariants({ variant: "outline", size: "sm" }) + " bg-white"}>
+        ← ことば一覧へ
+      </a>
+    </div>
   </div>
 </Layout>

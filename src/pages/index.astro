@@ -2,58 +2,79 @@
 import { getCollection } from "astro:content";
 import MeaningCards from "../components/MeaningCards";
 import SiteLogo from "../components/SiteLogo.astro";
+import { buttonVariants } from "../components/ui/button";
 import Layout from "../layouts/Layout.astro";
-import { TAGS } from "../lib/tags";
 
 const words = (await getCollection("words")).sort((a, b) =>
   a.data.reading.localeCompare(b.data.reading, "ja"),
 );
+
+// 代表例は float。サイト名の由来であり、切り替わるカードそのものを見せたいので
+// 一覧の上に 1 語だけ操作できる状態で置いてある（`client:load` の島）。
+const featured = words.find((word) => word.id === "float");
+
+// 黒帯をわずかに傾けた見出しラベル。紙に貼ったラベルの見立て。
+const LABEL =
+  "inline-block -rotate-2 transform bg-black px-3 py-1 text-xs font-black tracking-widest text-white uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] sm:text-sm";
 ---
 
 <Layout title="そのフロート、アイス乗ってません！">
   <div class="mx-auto max-w-5xl px-4 py-10 sm:px-8">
-    <header class="mb-8">
-      <h1 class="mb-3">
-        <SiteLogo class="h-auto w-full" />
+    <header class="mb-14">
+      <h1 class="mb-5 text-[32px] sm:text-[46px]">
+        <SiteLogo />
       </h1>
       <p class="font-bold text-black">
         エンジニアと非エンジニアで意味の違う語を、両方の視点から引ける辞書。
       </p>
     </header>
 
-    {/* 一覧は操作なしの静的プレビュー。カード全体が語ページへのリンク。
-        前面は語ページと同じ ENGINEER 側で揃えてある。 */}
-    <ul class="flex flex-wrap justify-center gap-x-14 gap-y-10">
-      {
-        words.map((word) => (
-          <li class="w-[320px] sm:w-[560px]">
-            <MeaningCards
-              href={`/words/${word.id}`}
-              term={word.data.term}
-              reading={word.data.reading}
-              engineer={word.data.engineer}
-              general={word.data.general}
-            />
-            {word.data.tags.length > 0 && (
-              <ul class="mt-12 flex flex-wrap gap-2">
-                {word.data.tags.map((tag) => (
-                  <li
-                    title={TAGS[tag].description}
-                    class:list={[
-                      "border-2 border-black px-2 py-0.5 text-xs font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
-                      TAGS[tag].world === "tech"
-                        ? "bg-[#4ECDC4]"
-                        : "bg-[#FFD166]",
-                    ]}
-                  >
-                    #{tag}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))
-      }
-    </ul>
+    {
+      featured && (
+        <section class="mb-20 flex flex-col items-center">
+          <p class={LABEL}>代表例 / {featured.data.term}</p>
+
+          {/* トップでは唯一の操作できるカード。カードをクリックすると前後が入れ替わる。 */}
+          <MeaningCards
+            client:load
+            heading="h2"
+            term={featured.data.term}
+            reading={featured.data.reading}
+            engineer={featured.data.engineer}
+            general={featured.data.general}
+          />
+
+          <a
+            href={`/words/${featured.id}`}
+            class={buttonVariants({ variant: "default", size: "sm" }) + " mt-12"}
+          >
+            {featured.data.term} のページへ
+          </a>
+        </section>
+      )
+    }
+
+    {/* 一覧は見出し語だけ。意味はそれぞれの語ページで読む。 */}
+    <section id="words" class="scroll-mt-24">
+      <h2 class={LABEL}>ことば一覧 / {words.length} 語</h2>
+
+      <ul class="mt-6 flex flex-wrap gap-3 sm:gap-4">
+        {
+          words.map((word) => (
+            <li>
+              <a
+                href={`/words/${word.id}`}
+                class={
+                  buttonVariants({ variant: "outline", size: "lg" }) +
+                  " bg-white text-lg font-black tracking-wider uppercase sm:text-xl"
+                }
+              >
+                {word.data.term}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
   </div>
 </Layout>

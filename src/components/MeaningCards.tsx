@@ -98,6 +98,11 @@ interface Props {
   defaultFront?: Side;
   /** 渡すと一覧用の静的プレビュー（カード全体がこの URL へのリンク）になる。 */
   href?: string;
+  /**
+   * GENERAL カードの語名が使う見出しレベル。語ページはページの主題そのものなので
+   * h1、それ以外（トップの代表例など）はページに h1 が別にあるので h2。
+   */
+  heading?: "h1" | "h2";
 }
 
 export default function MeaningCards({
@@ -108,6 +113,7 @@ export default function MeaningCards({
   defaultLevel = 1,
   defaultFront = "engineer",
   href,
+  heading,
 }: Props) {
   const [front, setFront] = useState<Side>(defaultFront);
   const [level, setLevel] = useState(defaultLevel);
@@ -117,9 +123,9 @@ export default function MeaningCards({
   const flip = () => setFront(engineerFront ? "general" : "engineer");
   const examples = engineerFront ? engineer.examples : general.examples;
 
-  // 語名の見出しは GENERAL 側が持つ（一覧では h2、語ページでは h1）。
+  // 語名の見出しは GENERAL 側が持つ（語ページでは h1、それ以外は h2）。
   // ENGINEER 側の同じ位置は見出しではないので p。
-  const GeneralHeading = preview ? "h2" : "h1";
+  const GeneralHeading = heading ?? (preview ? "h2" : "h1");
 
   const card = (side: Side) => {
     const style = CARDS[side];
