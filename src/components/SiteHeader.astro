@@ -1,0 +1,28 @@
+---
+// 全ページ共通のヘッダー。ロゴは常にここにあるので、各ページは自前でロゴを
+// 置かなくてよい（トップだけは大きめの見出しとして別途もう一度出す）。
+import SiteLogo from "./SiteLogo.astro";
+import { buttonVariants } from "./ui/button";
+---
+
+<header
+  class="sticky top-0 z-50 border-b-4 border-black bg-white shadow-[0_4px_0_0_rgba(0,0,0,0.15)]"
+>
+  <div
+    class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-8"
+  >
+    <a
+      href="/"
+      title="トップへ"
+      class="text-[16px] transition-transform hover:-translate-y-0.5 sm:text-[19px]"
+    >
+      <SiteLogo />
+    </a>
+
+    <nav>
+      <a href="/#words" class={buttonVariants({ variant: "secondary", size: "sm" })}>
+        ことば一覧
+      </a>
+    </nav>
+  </div>
+</header>

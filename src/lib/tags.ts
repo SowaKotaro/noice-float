@@ -37,6 +37,11 @@ export const TAGS = {
   食べ物: { world: "daily", description: "食品・料理" },
   動物: { world: "daily", description: "生き物" },
   日用品: { world: "daily", description: "身の回りの道具" },
+  家具: { world: "daily", description: "机・椅子など、部屋に置く道具" },
+  装身具: { world: "daily", description: "宝石・アクセサリーなど、身に着けて飾るもの" },
+  買い物: { world: "daily", description: "注文・会計など、店でのやりとり" },
+  スポーツ: { world: "daily", description: "運動・競技" },
+  ことば: { world: "daily", description: "会話で使う言い回しや、人や物の様子を表す語" },
 } as const satisfies Record<string, TagDef>;
 
 export type TagName = keyof typeof TAGS;
