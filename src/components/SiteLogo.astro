@@ -1,28 +1,52 @@
 ---
-// サイトのタイトルロゴ。画像をやめ、RetroUI のテーマ（純黒の枠線・ぼかしのない
-// オフセット影・角丸 0）で文字を組んでいる。
+// サイトのタイトルロゴ。画像ではなく文字組み。
 //
-// **書体は Dela Gothic One のサブセット**（`--font-logo`／global.css の @font-face）。
+// ## 考え方
+//
+// このサイトの見出しは**「勘違いを指摘するツッコミの台詞」**なので、ロゴは**吹き出し**。
+// 尻尾は左下に出していて、画面の左（＝ヘッダーではロゴの位置そのもの）に
+// 喋っている人がいる見立て。サイト唯一の吹き出しなので、これがロゴの形になる。
+//
+// **中の 2 語はサイトのカードと同じ色でマーカーしてある。**
+//   `フロート` … `--engineer` の青緑（エンジニア視点の float）
+//   `アイス`   … `--general` の黄（ふつうの人が思い浮かべる float）
+//   `！`       … `--primary` の赤（オチ。ここだけ少し傾けて跳ねさせる）
+// **タイトルそのものが「2 つの世界」の図解になっている**のがこのロゴの肝。
+// 色を変えるとその意味が消えるので、変えるならこのコメントごと考え直すこと。
+//
+// マーカーは**枠線なしの塗りだけ**。吹き出しの太い黒枠が唯一の輪郭になり、
+// 中は蛍光ペンで引いた印象になる（枠を足すと入れ子だらけで重くなる）。
+// 文字は 3 つとも黒のまま。サイトのカードと同じ「黒文字 ＋ 色面」の作り。
+//
+// ## 寸法
+//
+// **すべて em**。基準（＝親の font-size）は**いちばん大きい `フロート` の大きさ**。
+// 置く側は font-size を決めるだけでよい（ヘッダー 16/18px、トップの見出し 34/54px）。
+// px を混ぜるとヘッダー側で破綻するので、要素を足すときも必ず em で書くこと。
+// 全体は 幅 7.88em × 高さ 3.62em（およそ 2.2 : 1）。
+//
+// **1 つのロゴで 16px から 54px までまかなう**（版を分けていない）。文字の大小比を
+// 4 段に抑え、尻尾と影を em で書いてあるので縮めても成立する。
+//
+// 文字の大きさ（基準に対する比）と各行の幅：
+//   その 0.62 ／ フロート 1.0 ／ 、1.0 ／ アイス 0.8 ／ 乗ってません 0.55 ／ ！ 0.8
+//   1 行目 = 0.62×2 ＋（4 ＋ マーカー左右 0.14）＋ 0.414  = 5.79em
+//   2 行目 = (0.8×3 ＋ 0.112) ＋ 0.55×6 ＋ (0.8 ＋ 0.112) = 6.72em
+//   ※ 全角は 1.0em、読点「、」だけ 0.414em（`fontTools` で woff2 から実測）
+// 2 行目のほうが広いので吹き出しの幅はそちらで決まる。1 行目は中央に置いて釣り合わせる。
+//
+// **マーカーの上下パディングが `pt` と `pb` で違うのは意図的**（`HL` を参照）。
+//
+// ## 書体
+//
+// **Dela Gothic One のサブセット**（`--font-logo`／global.css の @font-face）。
 // 実体は単一ウェイトだが @font-face が `font-weight: 100 900` を名乗っているので、
 // `font-black` を当てても合成ボールドは掛からない。この指定は**フォールバック用**
 // （woff2 が読めなかったときにシステムのゴシックを太く出すため）なので消さないこと。
+// 出る文字は 17 字で変わっていないため、サブセットの作り直しは不要。
 //
-// **寸法はすべて em で書いてある**ので、置く側が font-size を決めるだけで拡縮できる。
-//   ヘッダー … text-[16px] sm:text-[19px]
-//   トップの見出し … text-[32px] sm:text-[46px]
-// px を混ぜると小さいほうで破綻するので、新しく要素を足すときも em で書くこと。
-//
-// **横長のロックアップで、縦横比はおよそ 5 : 2**（実測 2.57 : 1・ユーザー指示）。
-// 大きい語（フロート／アイス）を軸に、小さい語（その／乗ってません！）で行幅を
-// 揃えている。比率は次の 3 つで釣り合わせてあるので、文言や要素を足したら
-// 計測用のページを一時的に置いて（`getBoundingClientRect` を出すだけでよい）測り直すこと。
-//   - CHIP の上下パディング（厚いほど縦に伸びて比率が締まる）
-//   - 小さい側の text-[0.5em] / text-[0.46em]（小さいほど横が縮む）
-//   - チップの数（1 つ増えるとパディング＋枠＋隙間のぶん横に伸びる）
-//
-// 文字そのものなので、h1 の中に置けばそれが見出しテキストになる（旧・画像版の
-// alt と同じ役割）。読み上げは「その / フロート、/ アイス / 乗ってません / ！」。
-import { IceCreamCone } from "lucide-react";
+// 文字そのものなので、h1 の中に置けばそれが見出しテキストになる。
+// 読み上げは「そのフロート、/ アイス乗ってません！」の 2 行。
 
 interface Props {
   class?: string;
@@ -30,49 +54,51 @@ interface Props {
 
 const { class: className } = Astro.props;
 
-// 付箋・カードと同じ作り（黒枠＋右下へのオフセット影）を em で表したもの。
-// **display は持たせない**（各チップ側で指定する）。CHIP に inline-block を入れると
-// アイスのチップの inline-flex とぶつかり、Tailwind の出力順しだいで負ける。
-// 上下の余白が厚いのは、5 : 2 に収めるため。薄くすると横に伸びて間延びする。
-const CHIP =
-  "border-[0.05em] border-black px-[0.22em] pt-[0.26em] pb-[0.2em] shadow-[0.07em_0.07em_0_0_#000]";
+// マーカー（蛍光ペン）。`inline-block` ＋ `leading-none` にすると高さが
+// **ちょうど 1em に固定**され、フォントの ascent/descent に左右されなくなる
+// （素の inline のままだと背景が font の実高 1.448em に広がって隣の行とぶつかる）。
+//
+// `pt` 0.02 ／ `pb` 0.13 と非対称なのは**光学的に中央へ置くため**。行内で
+// ベースラインは上から 0.936em の位置にあり、和文の字面（em ボックス）は
+// ベースライン +0.88 〜 −0.12。そのままだと上に 0.056em の余りが出て下は 0 になる。
+// 上下の余白を 0.076em ずつに揃えた値が pt 0.02 / pb 0.13。**入れ替えないこと**。
+const HL = "inline-block px-[0.07em] pt-[0.02em] pb-[0.13em]";
 ---
 
+{/* 外枠は「傾き・影・尻尾のはみ出し」を padding で包むだけの箱。
+    これがあるおかげで、置く側は普通に並べるだけでよい（1.5deg の傾きで
+    上へ 0.10em、影で右下へ 0.1em、尻尾で下へ 0.33em はみ出す）。 */}
 <span
   class:list={[
-    "inline-flex flex-col items-start font-logo font-black leading-none text-black",
+    "inline-block pt-[0.12em] pr-[0.16em] pb-[0.55em] pl-[0.06em] align-top font-logo font-black leading-none whitespace-nowrap text-black",
     className,
   ]}
 >
-  <span class="flex items-end gap-[0.08em]">
-    <span class:list={[CHIP, "inline-block -rotate-3 bg-white text-[0.5em]"]}>
-      その
-    </span>
-    <span class:list={[CHIP, "inline-block rotate-1 bg-[#4ECDC4]"]}>
-      フロート、
-    </span>
-  </span>
+  {/* 吹き出し本体。影は `box-shadow` ではなく `drop-shadow`。
+      box-shadow だと四角い本体の影しか出ず、尻尾に影が付かない。
+      drop-shadow なら「本体＋尻尾」のシルエットに対して落ちる。ぼかしは 0。 */}
+  <span
+    class="relative block -rotate-[1.5deg] border-[0.05em] border-black bg-white px-[0.42em] py-[0.34em] text-center drop-shadow-[0.1em_0.1em_0_#000]"
+  >
+    <span class="block"
+      ><span class="text-[0.62em]">その</span><span
+        class:list={[HL, "bg-[#4ECDC4]"]}>フロート</span
+      >、</span
+    >
 
-  <span class="mt-[0.06em] flex items-end gap-[0.08em]">
-    <span
-      class:list={[
-        CHIP,
-        "inline-flex -rotate-2 items-center gap-[0.06em] bg-[#FFD166]",
-      ]}
+    <span class="mt-[0.1em] block"
+      ><span class:list={[HL, "bg-[#FFD166] text-[0.8em]"]}>アイス</span><span
+        class="text-[0.55em]">乗ってません</span
+      ><span class:list={[HL, "rotate-[4deg] bg-[#FF6B6B] text-[0.8em]"]}
+        >！</span
+      ></span
     >
-      <IceCreamCone
-        className="size-[0.75em]"
-        strokeWidth={2.5}
-        aria-hidden="true"
-      />
-      アイス
-    </span>
-    {/* 「！」は独立したチップにせず黒帯に取り込んである。チップを 1 つ減らすと
-        その分だけ行が短くなり、5 : 2 に収まる。赤はここで効かせる。 */}
+
+    {/* 尻尾。45 度に回した正方形の「右辺と下辺だけ」を黒くして V 字にしている。
+        上半分は吹き出しに重なり、白い面が本体の下辺を塗りつぶすので、
+        枠線が尻尾の付け根で切れて 1 本につながる（子要素は親の枠線より後に描かれる）。 */}
     <span
-      class:list={[CHIP, "inline-block rotate-1 bg-black text-[0.46em] text-white"]}
-    >
-      乗ってません<span class="text-[1.5em] text-[#FF6B6B]">！</span>
-    </span>
+      class="absolute -bottom-[0.28em] left-[0.9em] block h-[0.5em] w-[0.5em] rotate-45 border-r-[0.05em] border-b-[0.05em] border-black bg-white"
+    ></span>
   </span>
 </span>
