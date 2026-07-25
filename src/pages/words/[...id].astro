@@ -1,60 +1,144 @@
 ---
-import { getCollection, render } from "astro:content";
+import { render } from "astro:content";
 import MeaningCards from "../../components/MeaningCards";
+import WordEntry from "../../components/WordEntry.astro";
 import { buttonVariants } from "../../components/ui/button";
 import Layout from "../../layouts/Layout.astro";
+import {
+  breadcrumbNode,
+  termSetNodes,
+  websiteNode,
+  wordFaqNode,
+  wordNodes,
+} from "../../lib/schema";
+import { SITE_NAME, ogImagePath, pageTitle, tagPath, wordPath } from "../../lib/site";
 import { TAGS } from "../../lib/tags";
+import { CHIP, LABEL } from "../../lib/ui";
+import { getSortedWords, isoDate, lastModified, neighbors } from "../../lib/words";
 
 export async function getStaticPaths() {
-  const words = await getCollection("words");
-  return words.map((word) => ({ params: { id: word.id }, props: { word } }));
+  const words = await getSortedWords();
+  return words.map((word) => ({
+    params: { id: word.id },
+    props: { word, ...neighbors(words, word.id) },
+  }));
 }
 
-const { word } = Astro.props;
+const { word, prev, next } = Astro.props;
 const { Content } = await render(word);
 const hasBody = !!word.body?.trim();
+
+const { site } = Astro;
+const jsonLd = [
+  websiteNode(site),
+  ...termSetNodes(site),
+  ...wordNodes(word, site),
+  wordFaqNode(word, site),
+  breadcrumbNode(
+    [
+      [SITE_NAME, "/"],
+      ["ことば一覧", "/#words"],
+      [word.data.term, wordPath(word.id)],
+    ],
+    site,
+  ),
+];
+
+const updated = lastModified(word);
 ---
 
-<Layout title={`${word.data.term} - そのフロート、アイス乗ってません！`}>
+<Layout
+  title={pageTitle(word.data.term)}
+  description={word.data.tldr}
+  ogImage={ogImagePath(word.id)}
+  ogType="article"
+  jsonLd={jsonLd}
+>
   <div class="mx-auto max-w-3xl px-4 py-10 sm:px-8">
     {/* ロゴはヘッダーにあるので、ここはカードから始める。
         語名・読みはカードの中にある（GENERAL カードの大見出しが h1）。 */}
     <MeaningCards
-      client:load
+      client:visible
       term={word.data.term}
       reading={word.data.reading}
       engineer={word.data.engineer}
       general={word.data.general}
     />
 
+    {/* 一行の言い切り。meta description・OGP・JSON-LD と同じ文言を、
+        ページの本文としても出しておく（AI が引用するのはこの形の文）。 */}
+    <p
+      class="mx-auto mt-14 max-w-[560px] border-4 border-l-[12px] border-black border-l-[#FF6B6B] bg-white px-5 py-4 leading-relaxed font-bold text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+    >
+      {word.data.tldr}
+    </p>
+
     {
       word.data.tags.length > 0 && (
-        <ul class="mt-14 flex flex-wrap justify-center gap-2">
+        <ul class="mt-8 flex flex-wrap justify-center gap-2">
           {word.data.tags.map((tag) => (
-            <li
-              title={TAGS[tag].description}
-              class:list={[
-                "border-2 border-black px-2 py-0.5 text-xs font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:text-sm",
-                // タグの色を分野の世界に合わせる。tech=青緑／daily=黄。
-                TAGS[tag].world === "tech" ? "bg-[#4ECDC4]" : "bg-[#FFD166]",
-              ]}
-            >
-              #{tag}
+            <li>
+              <a
+                href={tagPath(tag)}
+                title={TAGS[tag].description}
+                class:list={[
+                  "inline-block border-2 border-black px-2 py-0.5 text-xs font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:text-sm",
+                  // タグの色を分野の世界に合わせる。tech=青緑／daily=黄。
+                  TAGS[tag].world === "tech" ? "bg-[#4ECDC4]" : "bg-[#FFD166]",
+                ]}
+              >
+                #{tag}
+              </a>
             </li>
           ))}
         </ul>
       )
     }
 
+    {/* カードに出ない全文（3 段階すべて・両方の用例・別名）はここ。 */}
+    <WordEntry word={word} />
+
     {
       hasBody && (
-        <div class="mt-10 border-4 border-black bg-white p-5 leading-loose shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
-          <Content />
+        <div class="mt-14">
+          <h2 class={LABEL}>もうすこし詳しく</h2>
+          <div class="mt-6 border-4 border-black bg-white p-5 leading-loose shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
+            <Content />
+          </div>
         </div>
       )
     }
 
-    <div class="mt-14 flex justify-center">
+    <p class="mt-10 text-sm font-bold text-black/60">
+      <time datetime={isoDate(updated)}>
+        {word.data.updatedAt ? "更新" : "公開"}：{isoDate(updated)}
+      </time>
+    </p>
+
+    {/* 五十音順の前後へ。回遊とクローラビリティの両方に効く。 */}
+    <nav aria-label="前後のことば" class="mt-14 grid gap-3 sm:grid-cols-2">
+      {
+        prev ? (
+          <a href={wordPath(prev.id)} class={`${CHIP} !py-2 text-left sm:text-base`}>
+            ← {prev.data.term}
+          </a>
+        ) : (
+          <span />
+        )
+      }
+      {
+        next && (
+          <a
+            href={wordPath(next.id)}
+            class={`${CHIP} !py-2 text-left sm:col-start-2 sm:text-right sm:text-base`}
+          >
+            {next.data.term} →
+          </a>
+        )
+      }
+    </nav>
+
+    <div class="mt-10 flex justify-center">
       <a href="/#words" class={buttonVariants({ variant: "outline", size: "sm" }) + " bg-white"}>
         ← ことば一覧へ
       </a>

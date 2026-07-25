@@ -3,6 +3,8 @@ term: "order"
 reading: "おーだー"
 aliases: ["オーダー", "順序", "並び順", "ORDER BY"]
 
+tldr: "エンジニアが order と言うときは、データの並び順のこと。飲食店での注文ではない。"
+
 engineer:
   levels:
     - "並び順のこと。取り出したデータをどう並べるかを指定する。"

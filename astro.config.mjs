@@ -2,13 +2,34 @@
 import { defineConfig } from 'astro/config';
 
 import react from '@astrojs/react';
+import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [react()],
+  /**
+   * canonical・OGP の絶対 URL・sitemap.xml・llms.txt がすべてここを起点にする。
+   * **ドメインはまだ取得していない**（候補は noicefloat.dev / noicefloat.com）。
+   * 確定したらこの 1 行を直せばサイト全体の絶対 URL が追従する
+   * （各ページは `Astro.site` 経由でしか URL を組み立てていない）。
+   */
+  site: 'https://noicefloat.dev',
+
+  integrations: [react(), sitemap()],
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+
+    ssr: {
+      // OGP 画像を焼く @resvg/resvg-js はネイティブアドオン（.node）なので
+      // バンドルできない。ビルド時にしか動かないため外部化して素の require に任せる。
+      external: ['@resvg/resvg-js']
+    },
+
+    build: {
+      // Astro 7 の vite は rolldown 版。ssr.external だけでは効かないので
+      // バンドラ側にも同じことを伝える。
+      rolldownOptions: { external: ['@resvg/resvg-js'] }
+    }
   }
 });

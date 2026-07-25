@@ -1,0 +1,46 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { buttonVariants } from "../components/ui/button";
+import { pageTitle, wordPath } from "../lib/site";
+import { CHIP, LABEL, PAPER } from "../lib/ui";
+import { getSortedWords } from "../lib/words";
+
+// 迷い込んだ人がそのまま引けるよう、404 にも全語を出しておく。
+const words = await getSortedWords();
+---
+
+<Layout
+  title={pageTitle("ページが見つかりません")}
+  description="お探しのページは見つかりませんでした。"
+  noindex
+>
+  <div class="mx-auto max-w-3xl px-4 py-16 sm:px-8">
+    <p class={LABEL}>404 / NOT FOUND</p>
+
+    <div class={`mt-6 ${PAPER} p-6 sm:p-8`}>
+      <p class="text-2xl font-black sm:text-3xl">そのページ、載ってません！</p>
+      <p class="mt-4 leading-relaxed font-bold text-black/70">
+        URL が変わったか、まだその語を書いていないかのどちらかです。
+      </p>
+    </div>
+
+    <h2 class={`mt-12 ${LABEL}`}>いま載っていることば</h2>
+    <ul class="mt-6 flex flex-wrap gap-2 sm:gap-3">
+      {
+        words.map((word) => (
+          <li>
+            <a href={wordPath(word.id)} class={`${CHIP} sm:text-base`}>
+              {word.data.term}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="mt-12">
+      <a href="/" class={buttonVariants({ variant: "default", size: "sm" })}>
+        トップへもどる
+      </a>
+    </div>
+  </div>
+</Layout>

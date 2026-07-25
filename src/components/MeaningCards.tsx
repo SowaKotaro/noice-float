@@ -1,7 +1,16 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CornerRightDown, Smile, Terminal } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { clsx } from "clsx";
 import type { LucideIcon } from "lucide-react";
+
+/*
+ * `@/lib/utils` の `cn`（= twMerge + clsx）ではなく **clsx を直接**使っている。
+ * tailwind-merge はクラスの衝突を実行時に解決するためにクラス名の一覧表を
+ * 抱えており、これがそのままクライアントバンドルに乗る（gzip でおよそ 8KB）。
+ * このコンポーネントが渡すのは静的な定数と排他的な三項演算子だけで、
+ * **同じプロパティのクラスが同時に当たることがない**ので衝突解決は要らない。
+ * 島の外（`buttonVariants` など astro 側）は従来どおり `cn` でよい。
+ */
 
 /**
  * 意味カード。`refs/NeoBrutalismCards.tsx` の見た目を踏襲している。
@@ -66,8 +75,11 @@ const OTHER: Record<Side, Side> = { engineer: "general", general: "engineer" };
 // 2 枚は「グリッドの同じセルに重ねる」（参考の absolute inset-0 から変えた唯一の点）。
 // こうするとセルの高さが背の高い方に合い、本文が長くてもカードが伸びて収まる
 // ＝カード内にスクロールバーが出ない。見た目（重なり・傾き・影）は参考のまま。
+// `select-none` は**付けない**。辞書なので定義文をコピーできる必要がある
+// （参考ファイルはドラッグ中の選択を嫌って全体に付けていたが、ここでは
+// 「選択があるときは入替を起こさない」という判定で代わりにしている。下の `flip`）。
 const CARD_BASE =
-  "col-start-1 row-start-1 border-4 border-black transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col justify-between p-5 sm:p-7 select-none";
+  "col-start-1 row-start-1 border-4 border-black transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col justify-between p-5 sm:p-7";
 const CARD_FRONT =
   "z-10 translate-x-0 translate-y-0 rotate-0 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[14px_14px_0px_0px_rgba(0,0,0,1)]";
 const CARD_BACK =
@@ -77,7 +89,7 @@ const CARD_BACK =
 // 上に残る**ように決めてある（背面は右下へ 16/24px ずれるので、その分の逃げが要る）。
 // 下端 8px はカードに重ねて、貼り付いている感じを出している。
 const TAB_BASE =
-  "absolute -top-16 sm:-top-20 w-32 sm:w-36 h-18 sm:h-22 border-4 border-black flex items-start justify-center pt-3 sm:pt-3.5 font-black text-sm sm:text-base tracking-widest z-[-1] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
+  "absolute -top-16 sm:-top-20 w-32 sm:w-36 h-18 sm:h-22 border-4 border-black flex items-start justify-center pt-3 sm:pt-3.5 font-black text-sm sm:text-base tracking-widest z-[-1] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] select-none";
 // 入替バッジ。2 枚とも同じ形・同じ並び（ラベル → アイコン）で、行き先の名前だけが違う。
 const BADGE =
   "shrink-0 whitespace-nowrap text-xs sm:text-sm font-black flex items-center gap-1.5 bg-white px-2 py-1 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all group-active:shadow-none group-active:translate-y-[2px] group-active:translate-x-[2px]";
@@ -118,10 +130,27 @@ export default function MeaningCards({
   const [front, setFront] = useState<Side>(defaultFront);
   const [level, setLevel] = useState(defaultLevel);
 
+  // 入替バッジの実体。押した瞬間にそのバッジは背面へ回って
+  // `tabIndex={-1}` になるので、**新しく前面に来た側のバッジへ焦点を移す**。
+  // これをやらないとキーボード操作でフォーカスが行方不明になる。
+  const badges = useRef<Partial<Record<Side, HTMLButtonElement | null>>>({});
+
   const preview = href !== undefined;
   const engineerFront = front === "engineer";
-  const flip = () => setFront(engineerFront ? "general" : "engineer");
   const examples = engineerFront ? engineer.examples : general.examples;
+
+  const flip = (moveFocus = false) => {
+    // 本文をドラッグして選択しただけのときは入れ替えない
+    // （カード全体がクリック対象なので、選択と入替が衝突する）。
+    if (!moveFocus && (window.getSelection()?.toString() ?? "") !== "") return;
+
+    const next = OTHER[front];
+    setFront(next);
+    if (moveFocus) {
+      // 再描画のあとで焦点を移す。
+      requestAnimationFrame(() => badges.current[next]?.focus());
+    }
+  };
 
   // 語名の見出しは GENERAL 側が持つ（語ページでは h1、それ以外は h2）。
   // ENGINEER 側の同じ位置は見出しではないので p。
@@ -135,14 +164,14 @@ export default function MeaningCards({
 
     return (
       <div
-        className={cn(
+        className={clsx(
           CARD_BASE,
           style.bg,
           isFront ? CARD_FRONT : CARD_BACK,
         )}
       >
         {/* 付箋 (ENGINEER は右上、GENERAL は左上) */}
-        <div className={cn(TAB_BASE, style.bg, style.tab)}>{style.label}</div>
+        <div className={clsx(TAB_BASE, style.bg, style.tab)}>{style.label}</div>
 
         <div className="flex h-full flex-col justify-between">
           <div>
@@ -159,7 +188,7 @@ export default function MeaningCards({
                   preview ? (
                     <span
                       key={label}
-                      className={cn(
+                      className={clsx(
                         CHIP,
                         i === level ? "bg-black text-white" : "bg-white",
                       )}
@@ -176,7 +205,7 @@ export default function MeaningCards({
                         event.stopPropagation();
                         setLevel(i);
                       }}
-                      className={cn(
+                      className={clsx(
                         CHIP,
                         "cursor-pointer transition-all disabled:pointer-events-none",
                         "active:translate-x-[2px] active:translate-y-[2px] active:shadow-none",
@@ -191,7 +220,7 @@ export default function MeaningCards({
                 )
               ) : (
                 // GENERAL 側に切替はないので、同じ位置に読みを置いて骨格を揃える。
-                <span className={cn(CHIP, "bg-white")}>{reading}</span>
+                <span className={clsx(CHIP, "bg-white")}>{reading}</span>
               )}
             </div>
 
@@ -209,9 +238,12 @@ export default function MeaningCards({
             </p>
             <Badge
               preview={preview}
-              onFlip={flip}
+              onFlip={() => flip(true)}
               focusable={isFront}
               target={OTHER[side]}
+              ref={(node) => {
+                badges.current[side] = node;
+              }}
             />
           </div>
         </div>
@@ -243,9 +275,15 @@ export default function MeaningCards({
 
   return (
     <div className="flex flex-col items-center">
-      <div className={stackClass} onClick={flip}>
+      <div className={stackClass} onClick={() => flip()}>
         {stack}
       </div>
+
+      {/* どちらが前面に来たかを読み上げる。カードは見た目でしか
+          前後が分からないので、視覚以外にも伝わるようにしておく。 */}
+      <p aria-live="polite" className="sr-only">
+        {engineerFront ? "エンジニア" : "ふつう"}の意味が前面です
+      </p>
 
       {examples.length > 0 && (
         <div className="mt-16 w-[320px] sm:w-[560px]">
@@ -254,7 +292,7 @@ export default function MeaningCards({
           </p>
           <ul className="flex flex-col items-start gap-2">
             {examples.map((example) => (
-              <li key={example} className={cn(CHIP, "bg-white")}>
+              <li key={example} className={clsx(CHIP, "bg-white")}>
                 {example}
               </li>
             ))}
@@ -274,12 +312,15 @@ function Badge({
   onFlip,
   focusable,
   target,
+  ref,
 }: {
   preview: boolean;
   onFlip: () => void;
   focusable: boolean;
   /** 押したときに前面へ出る側。 */
   target: Side;
+  /** 入替後に焦点を移すため、親がボタンの実体を掴んでおく。 */
+  ref?: (node: HTMLButtonElement | null) => void;
 }) {
   const content = (
     <>
@@ -298,13 +339,14 @@ function Badge({
   return (
     <button
       type="button"
+      ref={ref}
       onClick={(event) => {
         event.stopPropagation();
         onFlip();
       }}
       tabIndex={focusable ? 0 : -1}
       aria-label={`${JA[target]}の意味を前面に出す`}
-      className={cn(BADGE, "cursor-pointer")}
+      className={clsx(BADGE, "cursor-pointer")}
     >
       {content}
     </button>
