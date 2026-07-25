@@ -1,0 +1,118 @@
+---
+/**
+ * 語の「辞書エントリ」。カードの下に置く、**素の HTML の全文**。
+ *
+ * これがある理由は 2 つある。
+ *
+ * 1. **クローラと LLM に全文を届けるため。** 意味カードは React 島なので、
+ *    HTML に文字として出るのは `levels[1]` と前面側の用例だけ。残り
+ *    （`levels[0]` / `levels[2]` / もう一方の用例 / `aliases`）は
+ *    `<astro-island props="...">` の**属性値の中**にしか無く、
+ *    検索エンジンも AI クローラも本文として扱わない。
+ * 2. **カードが構造上できないことをやるため。** カードは 2 つの意味を
+ *    重ねて隠す作りなので、3 段階を見比べることも、両方の意味を同時に
+ *    読むこともできない。ここはその逆で、全部を一度に並べる。
+ *
+ * したがって**カードの表示と内容が重複するのは意図的**。上が体験、ここが記録。
+ *
+ * 見た目は `AGENTS.md` の紙面の語彙どおり（黒 4px 枠・オフセット影・
+ * 傾けた黒ラベル・ENGINEER は #4ECDC4／GENERAL は #FFD166）。
+ */
+// client: 指定なしで置くと、Astro がビルド時に静的な SVG へ描き切る
+// （React ランタイムはこのページのぶんには載らない）。
+import { Smile, Terminal } from "lucide-react";
+import { CHIP, LABEL, PAPER } from "../lib/ui";
+import type { Word } from "../lib/words";
+
+interface Props {
+  word: Word;
+}
+
+const { word } = Astro.props;
+const { term, reading, aliases, engineer, general } = word.data;
+
+const STAGES = ["さらっと", "しっかり", "がっつり"] as const;
+
+const HEAD = "flex items-center gap-2 border-b-4 border-black px-5 py-3 text-lg font-black tracking-wider sm:text-xl";
+const DT = "mb-1 inline-block border-2 border-black bg-black px-2 py-0.5 text-xs font-black tracking-widest text-white sm:text-sm";
+const DD = "mb-5 leading-relaxed font-bold text-black last:mb-0";
+const SUBHEAD = "mb-2 text-sm font-black tracking-widest text-black/50 uppercase";
+---
+
+<section aria-labelledby="entry-heading" class="mt-20">
+  <h2 id="entry-heading" class={LABEL}>辞書エントリ / {term}</h2>
+
+  <div class={`mt-6 ${PAPER}`}>
+    {/* エンジニア側：3 段階を全部並べる。カードでは 1 つずつしか読めない。 */}
+    <h3 class={`${HEAD} bg-[#4ECDC4]`}>
+      <Terminal size={22} aria-hidden="true" />
+      エンジニアの「{term}」
+    </h3>
+
+    <div class="px-5 py-5 sm:px-7">
+      <dl>
+        {
+          STAGES.map((stage, i) => (
+            <>
+              <dt class={DT}>{stage}</dt>
+              <dd class={DD}>{engineer.levels[i]}</dd>
+            </>
+          ))
+        }
+      </dl>
+
+      {
+        engineer.examples.length > 0 && (
+          <div class="mt-6 border-t-4 border-black/10 pt-5">
+            <p class={SUBHEAD}>こんなふうに使う</p>
+            <ul class="flex flex-col items-start gap-2">
+              {engineer.examples.map((example) => (
+                <li class={CHIP}>{example}</li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+
+    {/* ふつう側。骨格はエンジニア側と揃える（色と中身だけが違う）。 */}
+    <h3 class={`${HEAD} border-t-4 bg-[#FFD166]`}>
+      <Smile size={22} aria-hidden="true" />
+      ふつうの「{term}」
+    </h3>
+
+    <div class="px-5 py-5 sm:px-7">
+      <p class="leading-relaxed font-bold text-black">{general.meaning}</p>
+
+      {
+        general.examples.length > 0 && (
+          <div class="mt-6 border-t-4 border-black/10 pt-5">
+            <p class={SUBHEAD}>こんなふうに使う</p>
+            <ul class="flex flex-col items-start gap-2">
+              {general.examples.map((example) => (
+                <li class={CHIP}>{example}</li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+
+    {/* 読みと別名。表記ゆれで探しに来た人がここで着地できるようにする
+        （「クローリング」「巡回」のような別名は、これまでどこにも出ていなかった）。 */}
+    <div class="border-t-4 border-black bg-black/5 px-5 py-4 sm:px-7">
+      <dl class="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-sm">
+        <dt class="font-black">読み</dt>
+        <dd class="font-bold">{reading}</dd>
+        {
+          aliases.length > 0 && (
+            <>
+              <dt class="ml-3 font-black">別名</dt>
+              <dd class="font-bold">{aliases.join("、")}</dd>
+            </>
+          )
+        }
+      </dl>
+    </div>
+  </div>
+</section>

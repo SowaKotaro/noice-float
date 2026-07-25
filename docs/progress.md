@@ -20,6 +20,10 @@
 タグは分野ファセットに整理済み。タイトルロゴだけ専用フォントを自己ホストしていて、
 見出し・本文のフォントと検索はまだ入っていない段階です。
 
+**2026-07-25、SEO / LLMO の基盤を一式入れた**（詳細は下の「SEO / LLMO 基盤」）。
+サイトは 7 ページから 17 ページ（＋ OGP 画像 7 枚）になり、
+語ページの全文が HTML に出るようになっています。
+
 > **重要な方針転換（2026-07-24）**：当初の「部分列制約＋CSS だけで説明文を段階変形」
 > という核をやめ、**3 段階の独立した説明文を React（MeaningCards 島）で切り替える**方式に
 > 変更した。理由は、部分列を保ったまま自然な多段階の文を書くのが執筆上つらいため。
@@ -241,6 +245,55 @@
   リンクになり、ボタン類は `span` で出る。一覧を見出し語だけにしたので**今はどこからも
   使っていない**が、カードを並べたくなったときのために残してある
 
+### SEO / LLMO 基盤（2026-07-25）
+
+**着手前の状態がかなり悪かった**ので、その記録も残しておく。
+
+- `site` 未設定 → canonical・OGP の絶対 URL・sitemap がどれも作れなかった
+- description が**全ページ同一**（6 語ページとも同じ 1 文）
+- OGP / Twitter Card が**皆無**。共有しても白いカードしか出ない
+- 構造化データ ゼロ。robots.txt / sitemap / RSS / 404 も無し
+- favicon の `<link>` が無く、`public/favicon.svg` は完全に未使用だった
+- **語ページの本文が 0 文字**（6 語すべて frontmatter だけ）。
+  `hasBody` 分岐は一度も実行されていなかった
+- **可視テキストに出ていたのは `levels[1]` と前面側の用例だけ。**
+  `levels[0]` / `levels[2]` / もう一方の用例 / `aliases` は
+  `<astro-island props="...">` の属性値の中にしか無く、クローラからは見えていなかった
+  （`crawl` の別名「クローリング」「巡回」はページのどこにも出ていなかった）
+
+入れたもの：
+
+- `astro.config.mjs` に `site`（`https://noicefloat.dev`。**名前は決まったが取得はまだ**）、
+  `@astrojs/sitemap`
+- `Layout.astro` に canonical・OGP・Twitter Card・favicon・theme-color・
+  JSON-LD の口・RSS の autodiscovery・ロゴフォントの preload・スキップリンク
+- **`WordEntry.astro`** — カードの下に置く静的な全文。これが最大の変更
+- `tldr`（必須）と `updatedAt`（任意）を content スキーマに追加。
+  `tldr` は 1 文の言い切りで、meta description・OGP・JSON-LD・本文の 4 か所に入る
+- JSON-LD（`src/lib/schema.ts`）… `DefinedTerm` を **2 ノード**
+  （エンジニア／ふつうの `DefinedTermSet` にそれぞれ属させる）＋ `FAQPage` ＋
+  `BreadcrumbList` ＋ トップの `ItemList`
+- `/llms.txt` `/llms-full.txt` `/words/<語>.md`（`src/lib/plaintext.ts`）
+- `/tags/<分野>/` と、トップの「分野から引く」。語ページのタグをリンク化
+- 前後の語ナビ（五十音順）。並び順は `src/lib/words.ts` に一本化
+- OGP 画像のビルド時生成（satori + resvg）。フォントは**ロゴ用とは別のサブセット**
+  （`scripts/subset-og-font.py`、38KB の ttf。satori は woff2 を読めない）
+- `/rss.xml`、`robots.txt`（AI クローラを名指しで許可）、404 ページ
+- CI（`.github/workflows/ci.yml`）… `npm run check` と `npm run build` だけ
+
+副次的に直したもの：
+
+- **カードの `select-none` を外した**（辞書なのに定義文がコピーできなかった）。
+  ドラッグ選択と入替の衝突は「選択があるときは入れ替えない」判定に置き換え
+- **入替後のフォーカス喪失**を修正（押したバッジが背面に回って `tabIndex={-1}`
+  になり、焦点が宙に浮いていた）。新しく前面に来た側のバッジへ移す
+- 前面がどちらかを `aria-live` で読み上げるようにした
+- `MeaningCards` から tailwind-merge を外した（`cn` → `clsx`）。
+  **島の JS が gzip 11.4KB → 3.2KB**
+- 語ページの島を `client:load` → `client:visible` に
+- `tsconfig.json` の `exclude` に `refs` を追加（参考ファイルは JSX コメントを
+  含む素材で、そのままだと `astro check` が 33 件のエラーを吐いていた）
+
 ### 設計の変遷（旧「核」の廃止）
 
 当初は **部分列制約＋CSS だけで説明文を段階変形**する方式だった（`engineer.levels` の後段が
@@ -259,22 +312,34 @@
 
 ## 未着手（おすすめの順）
 
-1. **初回オンボーディング** — 「あなたはエンジニア？」を初回訪問時だけ出して、
+0. **ドメインの取得** — 名前は **`noicefloat.dev` に決定**済み（2026-07-25）。
+   コードにはもう入っているので、残っているのは取得と DNS・certbot の設定だけ。
+   万一変える場合に直すのは `astro.config.mjs` の `site` 1 行と
+   `public/robots.txt` の `Sitemap:` 行の 2 か所
+1. **語を増やす** — 6 語では検索でも AI 引用でも勝負にならない。
+   基盤は揃ったので、ここから先はほぼこれが効く
+2. **検索・タグ絞り込み** — 依存パッケージなし。部分一致 +
+   ひらがな/カタカナ・大文字小文字・全角半角の正規化。
+   分野ページは入ったので、残りは語の全文検索
+3. **初回オンボーディング** — 「あなたはエンジニア？」を初回訪問時だけ出して、
    意味カードの初期の前面（エンジニア／ふつう）と初期段階を決める。
    `MeaningCards` の `defaultFront` / `defaultLevel` に渡すだけで効く作りにしてある
-2. **検索・タグ絞り込み** — 依存パッケージなし。部分一致 +
-   ひらがな/カタカナ・大文字小文字・全角半角の正規化
-3. **フォント（見出し・本文）** — ロゴだけは Dela Gothic One を自己ホスト済み
+4. **フォント（見出し・本文）** — ロゴだけは Dela Gothic One を自己ホスト済み
    （`--font-logo`）。残りは見出し用の自己ホストと、ASCII だけ `unicode-range` で
    等幅にする話。`--font-sans` / `--font-head` の差し替えだけで済むようにしてある。
    サブセットの手順は `scripts/subset-logo-font.py` がそのまま雛形になる
    （見出しは出現文字が限定できないぶん、サブセットの粒度を決める必要がある）
-4. **OGP 画像** — satori + `@resvg/resvg-js` でビルド時に静的生成
-5. **執筆支援 CLI** — `npm run draft <term>`。`@anthropic-ai/sdk` で削り段階の
-   候補を生成し、`isSubsequence` で機械的に検証する
-6. **GA4** — プライバシーポリシー、外部送信の公表、同意バナーがセットで必要
-7. **デプロイスクリプト** — rsync 先はドメイン決定後
-8. **サイトマップ** — `@astrojs/sitemap`
+5. **React 依存そのものを外す** — 意味カードの状態は前面と段階の 2 つだけ。
+   素の DOM 操作 15 行で置き換えられ、**gzip 63KB がまるごと消える**
+   （react-dom 57KB ＋ react 2.9KB ＋ 島 3.2KB）。見た目は 1px も変えずにできるが、
+   `AGENTS.md` の「唯一の状態を持つ island」という設計が変わるので要判断
+6. **執筆支援 CLI** — `npm run draft <term>`。`@anthropic-ai/sdk` で 3 段階と
+   `tldr` の候補を生成する（部分列制約は廃止したので、検証は `length(3)` だけ）
+7. **GA4** — プライバシーポリシー、外部送信の公表、同意バナーがセットで必要。
+   Cookie を使わない Cloudflare Web Analytics などにすればバナーが不要になる
+8. **デプロイスクリプト** — rsync 先はドメイン決定後。
+   nginx 側は gzip/brotli と、`_astro/` への `immutable`（ハッシュ付きなので効く）
+9. **Search Console / Bing Webmaster への登録** — ドメイン確定後
 
 ---
 
@@ -308,7 +373,8 @@
 
 ### 技術選定書に残っている未決事項
 
-- ドメイン取得（`noicefloat.dev` / `noicefloat.com` が候補）
+- ~~ドメイン取得（`noicefloat.dev` / `noicefloat.com` が候補）~~ → **`noicefloat.dev` に決定**
+  （2026-07-25）。取得そのものはまだ
 - ~~カテゴリ体系（`engineer.category` / `general.category`）~~ → `category` は廃止し、
   分野は `src/lib/tags.ts` の統制タグへ一本化した
 - ~~スライダーの UI 文言~~ → 段階ボタンは さらっと / しっかり / がっつり に決定。

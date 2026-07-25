@@ -1,0 +1,31 @@
+# パブリックリポジトリなので、他人の PR も安全に取り込めるよう
+# 「ビルドが通るか」だけを見る軽量なワークフローにしてある。
+# デプロイはローカルからの rsync で行うため、ここでは何もデプロイしない。
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # 型と Astro テンプレートの検査。
+      - run: npm run check
+
+      # 本番と同じビルド。ここで content の検証も走る
+      # （engineer.levels が 3 個か、tags が統制語彙かなど）。
+      - run: npm run build

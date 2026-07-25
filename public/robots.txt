@@ -1,0 +1,49 @@
+# そのフロート、アイス乗ってません！
+#
+# 引用されることが価値のサイトなので、AI クローラも明示的に許可している。
+# 「書いていない ＝ 許可」と解釈されるとは限らないため、名前を挙げて書いておく。
+
+User-agent: *
+Allow: /
+
+# 検索・回答系
+User-agent: Googlebot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://noicefloat.dev/sitemap-index.xml

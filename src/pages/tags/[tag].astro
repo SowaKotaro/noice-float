@@ -1,0 +1,89 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { buttonVariants } from "../../components/ui/button";
+import { breadcrumbNode, tagCollectionNode, websiteNode } from "../../lib/schema";
+import { SITE_NAME, pageTitle, tagPath, wordPath } from "../../lib/site";
+import { TAGS, type TagName } from "../../lib/tags";
+import { CHIP, LABEL } from "../../lib/ui";
+import { getSortedWords } from "../../lib/words";
+
+export async function getStaticPaths() {
+  const words = await getSortedWords();
+
+  // 語が 1 つも付いていないタグはページを作らない（空ページを増やさない）。
+  return (Object.keys(TAGS) as TagName[])
+    .map((tag) => ({ tag, matched: words.filter((w) => w.data.tags.includes(tag)) }))
+    .filter(({ matched }) => matched.length > 0)
+    .map(({ tag, matched }) => ({ params: { tag }, props: { tag, words: matched } }));
+}
+
+const { tag, words } = Astro.props as { tag: TagName; words: Awaited<ReturnType<typeof getSortedWords>> };
+const def = TAGS[tag];
+const worldLabel = def.world === "tech" ? "エンジニア側" : "日常側";
+
+const description = `「${tag}」の分野の語（${def.description}）。${words
+  .map((w) => w.data.term)
+  .join("・")} の ${words.length} 語を、エンジニアとふつうの両方の意味で引けます。`;
+
+const jsonLd = [
+  websiteNode(Astro.site),
+  tagCollectionNode(tag, words, Astro.site),
+  breadcrumbNode(
+    [
+      [SITE_NAME, "/"],
+      ["分野から引く", "/#tags"],
+      [`#${tag}`, tagPath(tag)],
+    ],
+    Astro.site,
+  ),
+];
+---
+
+<Layout title={pageTitle(`#${tag} の語`)} description={description} jsonLd={jsonLd}>
+  <div class="mx-auto max-w-3xl px-4 py-10 sm:px-8">
+    <p class={LABEL}>分野 / {worldLabel}</p>
+
+    {/* ラベルも見出しも inline-block なので、包まないと同じ行に流れて重なる。 */}
+    <div class="mt-6">
+      <h1
+        class:list={[
+          "inline-block border-4 border-black px-4 py-2 text-3xl font-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:text-4xl",
+          def.world === "tech" ? "bg-[#4ECDC4]" : "bg-[#FFD166]",
+        ]}
+      >
+        #{tag}
+      </h1>
+    </div>
+
+    <p class="mt-5 leading-relaxed font-bold text-black">{def.description}</p>
+
+    <h2 class={`mt-12 ${LABEL}`}>この分野のことば / {words.length} 語</h2>
+
+    <ul class="mt-6 flex flex-col gap-4">
+      {
+        words.map((word) => (
+          <li>
+            <a
+              href={wordPath(word.id)}
+              class="block border-4 border-black bg-white p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:p-5"
+            >
+              <p class="flex flex-wrap items-baseline gap-3">
+                <span class="text-xl font-black tracking-wider uppercase sm:text-2xl">
+                  {word.data.term}
+                </span>
+                <span class={CHIP}>{word.data.reading}</span>
+              </p>
+              <p class="mt-3 leading-relaxed font-bold text-black/80">{word.data.tldr}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="mt-14 flex justify-center">
+      <a href="/#tags" class={buttonVariants({ variant: "outline", size: "sm" }) + " bg-white"}>
+        ← ほかの分野へ
+      </a>
+    </div>
+  </div>
+</Layout>

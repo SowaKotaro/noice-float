@@ -82,10 +82,18 @@ GENERAL 側が持ち、ENGINEER 側の同じ位置は `p`。カードのどこ�
 | `refs/NeoBrutalismCards.tsx` | デザインの原典。見た目で迷ったらこれに合わせる |
 | `src/components/MeaningCards.tsx` | 重なる意味カード＋段階切替。唯一の状態を持つ island（`href` を渡すと一覧用の静的プレビュー） |
 | `src/lib/tags.ts` | タグの統制語彙（tech/daily の 2 世界）。未定義タグはビルド停止 |
+| `src/components/WordEntry.astro` | カードの下に置く**静的な全文**（3 段階すべて・両方の用例・別名）。島の外なので JS なしで読める |
+| `src/lib/site.ts` | サイト定数と**絶対 URL の唯一の出どころ**。起点は `astro.config.mjs` の `site` |
+| `src/lib/schema.ts` | JSON-LD。`DefinedTerm` を 2 ノード（エンジニア／ふつう）＋ `FAQPage` ＋ パンくず |
+| `src/lib/plaintext.ts` | `llms.txt` / `llms-full.txt` / `/words/<語>.md` の生成。3 つとも同じ関数から作る |
+| `src/lib/words.ts` | 語の取得と**並び順の一本化**（読みの五十音順）。前後ナビもここ |
+| `src/lib/ui.ts` | 複数ページで使う装飾クラス（黒ラベル・白チップ・白い箱） |
+| `src/pages/og/_card.ts` | OGP 画像のレイアウト。`_` 始まりなのでルートにならない |
 | `src/components/ui/` | shadcn CLI で取り込んだ RetroUI コンポーネント。手で書き換えてよい |
 | `src/components/SiteLogo.astro` | タイトルロゴ。**画像ではなく文字組みの吹き出し**。寸法は全部 em で、親の font-size だけで拡縮する（版は 1 つだけ） |
 | `src/components/SiteHeader.astro` | 全ページ共通ヘッダー（sticky）。小さいロゴ＋「ことば一覧」 |
 | `scripts/subset-logo-font.py` | ロゴ書体（Dela Gothic One）をロゴの文字だけに削って woff2 にする |
+| `scripts/subset-og-font.py` | 上とは別物。**OGP 画像用の ttf**（satori は woff2 を読めない）。ブラウザには配らない |
 | `public/fonts/` | 上の出力 ＋ `OFL.txt`（再配布に必要なライセンス全文。消さないこと） |
 | `scripts/recolor-logo.py` | 旧・画像ロゴの塗り替え。**現在サイトからは参照していない**（OGP 用に残してある） |
 | `src/styles/global.css` | RetroUI テーマ（配色・影・角丸） |
@@ -128,6 +136,36 @@ violet-300、`--engineer` は `#4ECDC4`、`--general` は `#FFD166`、`--border`
 紙面は**ドットの下敷きの上に書類を置く**構成。ドットは `body` に敷いてあり、色は `--dot`。
 カードのオフセット影が浮いて見えるのはこの下敷きのおかげ。見出しラベルは
 **黒帯をわずかに傾けて**置く（用例ラベルなど）。紙に貼ったラベルの見立て。
+
+## SEO / LLMO まわりの決めごと
+
+**カードは JS で切り替わるので、HTML に文字として出るのは 1 段階ぶんだけ。**
+残りは `<astro-island props="...">` の**属性値の中**にしかなく、クローラも
+LLM も本文として読まない。だから **`WordEntry.astro` が全文を静的に出す**。
+ここは SEO 用の重複ではなく「カードが構造上できないこと（3 段階の見比べ・
+両方の意味の同時表示）をやる場所」。**片方だけ直して内容がずれないようにすること。**
+
+- **絶対 URL は `src/lib/site.ts` でしか作らない。** ドメインは未取得で、
+  `astro.config.mjs` の `site` に暫定値が入っている。各ページで文字列連結すると
+  ドメイン確定時に直し漏れる
+- **`tldr` は 1 語 1 文の言い切り**（「エンジニアが X と言うときは〜。〜ではない。」）。
+  meta description・OGP・JSON-LD の description・ページ冒頭の 4 か所に**同じ文**が入る。
+  出どころは 1 つ（frontmatter）なのでずれない。必須項目
+- **語の並び順は `src/lib/words.ts` の五十音順に一本化**。一覧・前後ナビ・
+  llms.txt が別々に並べ替えると「一覧の隣」と「次の語」がずれる
+- **OGP 画像に説明文は載せない。** 載せると任意の漢字が要り、同梱フォントが
+  数 MB になる。画像は「語」と「2 つの意味がある」という構図だけを見せ、
+  説明は OGP の description が担当する。この住み分けのおかげで
+  OG フォントは ASCII ＋ かな ＋ 固定文言だけで 38KB に収まっている。
+  **固定文言を足したら `src/pages/og/_card.ts` の `OG_FIXED_TEXT` に書き、
+  `python3 scripts/subset-og-font.py` を実行し直す**（忘れると豆腐になる。
+  ビルドログに警告は出る）
+- **島の中では `cn`（tailwind-merge）を使わない。** クラス衝突の解決表が
+  そのままクライアントへ行く（gzip 8KB）。`MeaningCards.tsx` は `clsx` 直呼び。
+  島の外（`buttonVariants` など astro 側）は `cn` のままでよい
+- **カードに `select-none` を戻さないこと。** 辞書なので定義文はコピーできる
+  必要がある。ドラッグ選択と入替の衝突は「選択があるときは入れ替えない」という
+  判定で処理している（`MeaningCards.tsx` の `flip`）
 
 ## Development
 
