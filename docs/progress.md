@@ -263,7 +263,7 @@
 
 入れたもの：
 
-- `astro.config.mjs` に `site`（**暫定 `https://noicefloat.dev`**。ドメイン未取得）、
+- `astro.config.mjs` に `site`（`https://noicefloat.dev`。**名前は決まったが取得はまだ**）、
   `@astrojs/sitemap`
 - `Layout.astro` に canonical・OGP・Twitter Card・favicon・theme-color・
   JSON-LD の口・RSS の autodiscovery・ロゴフォントの preload・スキップリンク
@@ -312,9 +312,9 @@
 
 ## 未着手（おすすめの順）
 
-0. **ドメインの取得**（`noicefloat.dev` / `noicefloat.com`）。
-   **いま暫定値で動いている**ので、これが決まらないと canonical・OGP・sitemap・
-   robots.txt の URL が正しくならない。直すのは `astro.config.mjs` の `site` 1 行と
+0. **ドメインの取得** — 名前は **`noicefloat.dev` に決定**済み（2026-07-25）。
+   コードにはもう入っているので、残っているのは取得と DNS・certbot の設定だけ。
+   万一変える場合に直すのは `astro.config.mjs` の `site` 1 行と
    `public/robots.txt` の `Sitemap:` 行の 2 か所
 1. **語を増やす** — 6 語では検索でも AI 引用でも勝負にならない。
    基盤は揃ったので、ここから先はほぼこれが効く
@@ -373,7 +373,8 @@
 
 ### 技術選定書に残っている未決事項
 
-- ドメイン取得（`noicefloat.dev` / `noicefloat.com` が候補）
+- ~~ドメイン取得（`noicefloat.dev` / `noicefloat.com` が候補）~~ → **`noicefloat.dev` に決定**
+  （2026-07-25）。取得そのものはまだ
 - ~~カテゴリ体系（`engineer.category` / `general.category`）~~ → `category` は廃止し、
   分野は `src/lib/tags.ts` の統制タグへ一本化した
 - ~~スライダーの UI 文言~~ → 段階ボタンは さらっと / しっかり / がっつり に決定。

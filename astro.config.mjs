@@ -9,8 +9,10 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   /**
    * canonical・OGP の絶対 URL・sitemap.xml・llms.txt がすべてここを起点にする。
-   * **ドメインはまだ取得していない**（候補は noicefloat.dev / noicefloat.com）。
-   * 確定したらこの 1 行を直せばサイト全体の絶対 URL が追従する
+   *
+   * **noicefloat.dev で行くと決めた**（2026-07-25・ユーザー判断）。ただし
+   * **取得はまだ**なので、変える可能性は残っている。変えるときに直すのは
+   * この 1 行と `public/robots.txt` の `Sitemap:` 行の 2 か所だけ
    * （各ページは `Astro.site` 経由でしか URL を組み立てていない）。
    */
   site: 'https://noicefloat.dev',

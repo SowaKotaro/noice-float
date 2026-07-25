@@ -145,10 +145,10 @@ JavaScript なしで完全に読めます。
 さくら VPS（Ubuntu）+ nginx で静的配信します。ローカルでビルドして `dist/` を
 rsync する方式のため、サーバー側に Node.js は不要です。
 
-> **ドメインは未取得です。** `astro.config.mjs` の `site` に暫定で
-> `https://noicefloat.dev` を置いてあります。canonical・OGP・sitemap・llms.txt の
-> 絶対 URL はすべてここを起点にしているので、確定したらこの 1 行を直すだけで
-> サイト全体が追従します。
+> **ドメインは `noicefloat.dev` で行きます**（取得はまだ）。
+> `astro.config.mjs` の `site` に設定してあり、canonical・OGP・sitemap・llms.txt の
+> 絶対 URL はすべてここを起点にしています。変えるときに直すのは、この 1 行と
+> `public/robots.txt` の `Sitemap:` 行の 2 か所だけです。
 
 ## ライセンス
 
