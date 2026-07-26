@@ -1,7 +1,7 @@
 import rss from "@astrojs/rss";
 import type { APIRoute } from "astro";
 import { SITE_DESCRIPTION, SITE_NAME, wordPath } from "../lib/site";
-import { getSortedWords } from "../lib/words";
+import { getSortedWords, termLabel } from "../lib/words";
 
 /** 新着は公開日の降順。一覧（五十音順）とは並びが違うのでここで並べ直す。 */
 export const GET: APIRoute = async (context) => {
@@ -15,7 +15,7 @@ export const GET: APIRoute = async (context) => {
     site: context.site!,
     customData: "<language>ja</language>",
     items: words.map((word) => ({
-      title: `${word.data.term}（${word.data.reading}）`,
+      title: termLabel(word),
       description: word.data.tldr,
       pubDate: word.data.publishedAt,
       link: wordPath(word.id),

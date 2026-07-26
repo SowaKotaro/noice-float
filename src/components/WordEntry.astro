@@ -37,6 +37,9 @@ const HEAD = "flex items-center gap-2 border-b-4 border-black px-5 py-3 text-lg 
 const DT = "mb-1 inline-block border-2 border-black bg-black px-2 py-0.5 text-xs font-black tracking-widest text-white sm:text-sm";
 const DD = "mb-5 leading-relaxed font-bold text-black last:mb-0";
 const SUBHEAD = "mb-2 text-sm font-black tracking-widest text-black/50 uppercase";
+// 視点ごとの綴り。見出し語（カタカナ）は 2 視点で共通で、ここだけが食い違いうる
+// （ジェイソン ＝ JSON / Jason）。カードでは黒帯の中に出している位置。
+const SPELL = "text-xs font-black tracking-wider text-black/50 sm:text-sm";
 ---
 
 <section aria-labelledby="entry-heading" class="mt-20">
@@ -47,6 +50,7 @@ const SUBHEAD = "mb-2 text-sm font-black tracking-widest text-black/50 uppercase
     <h3 class={`${HEAD} bg-[#4ECDC4]`}>
       <Terminal size={22} aria-hidden="true" />
       エンジニアの「{term}」
+      <span class={SPELL}>{engineer.spelling}</span>
     </h3>
 
     <div class="px-5 py-5 sm:px-7">
@@ -79,6 +83,7 @@ const SUBHEAD = "mb-2 text-sm font-black tracking-widest text-black/50 uppercase
     <h3 class={`${HEAD} border-t-4 bg-[#FFD166]`}>
       <Smile size={22} aria-hidden="true" />
       ふつうの「{term}」
+      <span class={SPELL}>{general.spelling}</span>
     </h3>
 
     <div class="px-5 py-5 sm:px-7">

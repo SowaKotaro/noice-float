@@ -38,13 +38,14 @@
   下段の透かしとバッジ
 
 **2 枚のカードは同じ骨格**にする（参考の ENGINEER カード側の構造）。上から
-**見出しチップ（アイコン＋語）／チップ列／本文／下段（透かし＋バッジ）**。
-違うのは色・タブ・アイコン・透かし・チップ列・本文だけで、構造は
+**見出しチップ（アイコン＋語＋綴り）／チップ列／本文／下段（透かし＋バッジ）**。
+違うのは色・タブ・アイコン・透かし・綴り・チップ列・本文だけで、構造は
 `MeaningCards.tsx` の `card()` 一か所で描いている。差を付けたくなったら
 `CARDS` の表に足すこと（**片方だけレイアウトを変えない**）。
 
 | | ENGINEER | GENERAL |
 |---|---|---|
+| 綴り | `engineer.spelling` | `general.spelling` |
 | チップ列 | 3 段階の切替ボタン | 読み（切替はない） |
 | 本文 | `engineer.levels[n]` | `general.meaning` |
 | アイコン | `Terminal` | `Smile` |
@@ -56,8 +57,14 @@
 文言だけが `TAP FOR ENGINEER` / `TAP FOR GENERAL` と行き先で入れ替わる。
 片方だけ別の文言やアイコンにしないこと。
 
-語名は両方の見出しチップに出る。見出し要素（語ページの `h1`・一覧の `h2`）は
-GENERAL 側が持ち、ENGINEER 側の同じ位置は `p`。カードのどこをクリックしても前後が
+**見出し語（`term`）はカタカナ**で、両方の見出しチップに同じものが出る。
+その隣に小さく出る**英語の綴りだけが視点ごとに違いうる**
+（フロートはどちらも `float`、`Ruby` と `ruby` のように大文字小文字だけ違う例もある）。
+理由は下の「見出し語の表記」。
+
+見出し要素（語ページの `h1`・一覧の `h2`）は GENERAL 側が持ち、ENGINEER 側の同じ位置は
+`p`。**綴りの `span` は見出し要素の外に置く**（中に入れると `h1` のテキストが
+「ジェイソン Jason」になり `<title>` とずれる）。カードのどこをクリックしても前後が
 入れ替わる（参考と同じ）。段階チップとバッジだけは `stopPropagation` して入替を起こさない。
 
 デフォルト前面は語ページ・一覧とも**エンジニア**。一覧は `href` を渡した静的プレビューで、
@@ -74,11 +81,47 @@ GENERAL 側が持ち、ENGINEER 側の同じ位置は `p`。カードのどこ�
 > `subsequence.ts` / `levelize.ts` / `LevelText.astro` / `EngineerSlider.tsx` は
 > もう存在しない。
 
+## 見出し語の表記（2026-07-26）
+
+**`term`（見出し語）はカタカナ、英語の綴りは `engineer.spelling` /
+`general.spelling` が視点ごとに持つ。**
+
+このサイトが集めているすれ違いは**会話で起きる**（タイトルからしてツッコミの台詞）。
+つまり語の同一性を担保しているのは綴りではなく音で、`float` も口に出せば
+「ふろーと」で衝突する。見出しをカタカナにすると**見出し語がどちらの視点にも
+属さない中立な形**になり、次の 2 つが同時に片付く。
+
+- **綴りが食い違う語を同じ棚に置ける。** ジェイソン ＝ `JSON` / `Jason`、
+  キャッシュ ＝ `cache` / `cash`、シンク ＝ `sync` / `sink`、ルート ＝ `root` / `route`。
+  日本語話者にしか起きない誤解なので、この軸はサイトの独自性でもある
+- **`h1` が `<title>`・パンくずと一致する。** 見出し語がエンジニア側の綴りだった頃は、
+  `h1` を持つ GENERAL カードに何を出すかが決まらなかった
+
+**`spelling` は両側とも必須**にしてある。一致することが多く二度書きに見えるが、
+一致するかどうかを語ごとに必ず確かめさせるため（`Ruby` と `ruby` のように
+大文字小文字だけ違う例が既にある）。省略時フォールバックを足さないこと。
+
+綴りの行き先は次のとおり。**`term` だけで済ませる場所と併記する場所を混ぜないこと。**
+
+| 場所 | 出るもの |
+|---|---|
+| `h1` / 一覧の `h2` / パンくず / 前後ナビ | `term` だけ（中立な見出し語） |
+| カードの見出しチップ | `term` ＋ その視点の `spelling`（見出し要素の**外**） |
+| `<title>` / RSS / OGP 画像 | `termLabel()` ＝ `フロート（float）`、食い違えば `（JSON / Jason）` |
+| `WordEntry` の各節見出し / `*.md` の各節見出し | `term` ＋ その節の `spelling` |
+| JSON-LD | `name` は `term`、`alternateName` の先頭がその視点の `spelling` |
+
+併記の文字列は **`src/lib/words.ts` の `spellingLabel()` / `termLabel()` でしか作らない**
+（`term` と綴りを各所で連結すると、食い違う語だけ表示がばらける）。
+
+URL は `term` ではなく**ファイル名（`word.id`）**なので、見出しを変えても
+パーマリンクは動かない。`id` は英語の綴りに合わせる（`float.md` / `ruby.md`）。
+
 ## 主要ファイル
 
 | パス | 役割 |
 |---|---|
-| `src/content.config.ts` | Zod スキーマ（`engineer.levels` は 3 段階、タグは統制語彙） |
+| `src/content.config.ts` | Zod スキーマ（`term` はカタカナ、`spelling` は両側必須、`engineer.levels` は 3 段階、タグは統制語彙） |
 | `refs/NeoBrutalismCards.tsx` | デザインの原典。見た目で迷ったらこれに合わせる |
 | `src/components/MeaningCards.tsx` | 重なる意味カード＋段階切替。唯一の状態を持つ island（`href` を渡すと一覧用の静的プレビュー） |
 | `src/lib/tags.ts` | タグの統制語彙（tech/daily の 2 世界）。未定義タグはビルド停止 |
@@ -86,7 +129,7 @@ GENERAL 側が持ち、ENGINEER 側の同じ位置は `p`。カードのどこ�
 | `src/lib/site.ts` | サイト定数と**絶対 URL の唯一の出どころ**。起点は `astro.config.mjs` の `site` |
 | `src/lib/schema.ts` | JSON-LD。`DefinedTerm` を 2 ノード（エンジニア／ふつう）＋ `FAQPage` ＋ パンくず |
 | `src/lib/plaintext.ts` | `llms.txt` / `llms-full.txt` / `/words/<語>.md` の生成。3 つとも同じ関数から作る |
-| `src/lib/words.ts` | 語の取得と**並び順の一本化**（読みの五十音順）。前後ナビもここ |
+| `src/lib/words.ts` | 語の取得と**並び順の一本化**（読みの五十音順）。前後ナビと、綴り併記（`spellingLabel` / `termLabel`）もここ |
 | `src/lib/ui.ts` | 複数ページで使う装飾クラス（黒ラベル・白チップ・白い箱） |
 | `src/pages/og/_card.ts` | OGP 画像のレイアウト。`_` 始まりなのでルートにならない |
 | `src/components/ui/` | shadcn CLI で取り込んだ RetroUI コンポーネント。手で書き換えてよい |
@@ -159,7 +202,9 @@ LLM も本文として読まない。だから **`WordEntry.astro` が全文を�
   OG フォントは ASCII ＋ かな ＋ 固定文言だけで 38KB に収まっている。
   **固定文言を足したら `src/pages/og/_card.ts` の `OG_FIXED_TEXT` に書き、
   `python3 scripts/subset-og-font.py` を実行し直す**（忘れると豆腐になる。
-  ビルドログに警告は出る）
+  ビルドログに警告は出る）。語ごとに出るのは**見出し語（カタカナ）と綴り**で、
+  サブセットは ASCII とかな全域を無条件に入れているので、見出し語をカタカナに
+  しても綴りが `JSON / Jason` になっても**焼き直しは要らない**
 - **島の中では `cn`（tailwind-merge）を使わない。** クラス衝突の解決表が
   そのままクライアントへ行く（gzip 8KB）。`MeaningCards.tsx` は `clsx` 直呼び。
   島の外（`buttonVariants` など astro 側）は `cn` のままでよい

@@ -31,9 +31,13 @@ import type { LucideIcon } from "lucide-react";
  * チップ列・本文だけ。構造は下の `card()` 一か所で描いているので、
  * 差を付けたくなったら CARDS の表に足すこと。
  *
- *   見出しチップ（アイコン＋語）／チップ列／本文／下段（透かし＋バッジ）
+ *   見出しチップ（アイコン＋語＋綴り）／チップ列／本文／下段（透かし＋バッジ）
  *   ENGINEER … チップ列＝3 段階の切替、本文＝levels[n]
  *   GENERAL  … チップ列＝読み（切替はない）、本文＝ふつうの意味
+ *
+ * 見出しの語（カタカナ）は 2 枚で同じで、**その隣の綴りだけが視点ごとに違う**
+ * （フロートはどちらも `float`、ジェイソンなら `JSON` と `Jason`）。
+ * この 1 語の差がサイトの主題そのものなので、両側に対称に出す。
  *
  * 下段左の透かしは付箋と同じラベル（ENGINEER / GENERAL）。
  *
@@ -95,16 +99,23 @@ const BADGE =
   "shrink-0 whitespace-nowrap text-xs sm:text-sm font-black flex items-center gap-1.5 bg-white px-2 py-1 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all group-active:shadow-none group-active:translate-y-[2px] group-active:translate-x-[2px]";
 const CHIP =
   "px-2 py-0.5 border-2 border-black font-black text-xs sm:text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]";
+// 綴りを語の隣に並べるので inline-flex。`items-baseline` にしないのは、
+// 見出し側が flex でその先頭がアイコン（置換要素＝ベースラインは下端）なので、
+// ベースライン合わせにすると綴りが数 px 沈むため。
 const HEAD_CHIP =
-  "mb-3 inline-block w-fit -rotate-2 transform border-2 border-transparent bg-black px-3 py-1 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)]";
+  "mb-3 inline-flex w-fit items-center gap-2 -rotate-2 transform border-2 border-transparent bg-black px-3 py-1 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)]";
+// 見出しの語に添える英語の綴り。**見出し要素（h1）の外に置く**ので、
+// `h1` のテキストは中立な見出し語（カタカナ）だけになり、`<title>` とずれない。
+const HEAD_SPELLING = "text-xs font-black tracking-wider text-white/60 sm:text-sm";
 const BODY_TEXT =
   "border-b-4 border-black/20 pb-2 text-sm leading-relaxed font-bold text-black sm:text-base";
 
 interface Props {
+  /** 見出し語（カタカナ）。2 枚で共通。 */
   term: string;
   reading: string;
-  engineer: { levels: string[]; examples: string[] };
-  general: { meaning: string; examples: string[] };
+  engineer: { spelling: string; levels: string[]; examples: string[] };
+  general: { spelling: string; meaning: string; examples: string[] };
   /** 0=さらっと, 1=しっかり, 2=がっつり。 */
   defaultLevel?: number;
   defaultFront?: Side;
@@ -138,6 +149,10 @@ export default function MeaningCards({
   const preview = href !== undefined;
   const engineerFront = front === "engineer";
   const examples = engineerFront ? engineer.examples : general.examples;
+  const spelling: Record<Side, string> = {
+    engineer: engineer.spelling,
+    general: general.spelling,
+  };
 
   const flip = (moveFocus = false) => {
     // 本文をドラッグして選択しただけのときは入れ替えない
@@ -176,9 +191,10 @@ export default function MeaningCards({
         <div className="flex h-full flex-col justify-between">
           <div>
             <div className={HEAD_CHIP}>
-              <Heading className="flex items-center gap-2 text-xl font-black tracking-wider uppercase sm:text-2xl">
+              <Heading className="flex items-center gap-2 text-xl font-black tracking-wider sm:text-2xl">
                 <Icon size={22} /> {term}
               </Heading>
+              <span className={HEAD_SPELLING}>{spelling[side]}</span>
             </div>
 
             <div className="mb-3 flex flex-wrap gap-1.5 sm:gap-2">

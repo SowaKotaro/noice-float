@@ -63,7 +63,9 @@ export const wordNodes = (word: Word, site: URL | undefined) => {
       "@type": "DefinedTerm",
       "@id": `${url}#engineer`,
       name: term,
-      alternateName: [reading, ...aliases],
+      // 綴りは視点ごとに違いうる（ジェイソン ＝ JSON / Jason）ので、
+      // `name` は中立な見出し語のまま、その視点の綴りを別名の先頭に置く。
+      alternateName: [engineer.spelling, reading, ...aliases],
       description: engineer.levels[2],
       inDefinedTermSet: { "@id": termSetId("engineer", site) },
       url,
@@ -73,7 +75,7 @@ export const wordNodes = (word: Word, site: URL | undefined) => {
       "@type": "DefinedTerm",
       "@id": `${url}#general`,
       name: term,
-      alternateName: [reading, ...aliases],
+      alternateName: [general.spelling, reading, ...aliases],
       description: general.meaning,
       inDefinedTermSet: { "@id": termSetId("general", site) },
       url,
