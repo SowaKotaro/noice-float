@@ -41,6 +41,10 @@ export const TAGS = {
   装身具: { world: "daily", description: "宝石・アクセサリーなど、身に着けて飾るもの" },
   買い物: { world: "daily", description: "注文・会計など、店でのやりとり" },
   スポーツ: { world: "daily", description: "運動・競技" },
+  乗り物: { world: "daily", description: "車・道路など、移動にまつわる語" },
+  音楽: { world: "daily", description: "演奏・楽曲・音楽を聴く道具" },
+  娯楽: { world: "daily", description: "映画・ゲーム・物語に出てくる語" },
+  仕事: { world: "daily", description: "職業・肩書き・働き方" },
   ことば: { world: "daily", description: "会話で使う言い回しや、人や物の様子を表す語" },
 } as const satisfies Record<string, TagDef>;
 
