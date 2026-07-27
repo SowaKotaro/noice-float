@@ -14,7 +14,7 @@
  */
 
 import { SITE_DESCRIPTION, SITE_NAME, absolute, wordPath } from "./site";
-import { isoDate, lastModified, type Word } from "./words";
+import { isoDate, lastModified, spellingLabel, type Word } from "./words";
 
 const STAGES = ["さらっと", "しっかり", "がっつり"] as const;
 
@@ -35,7 +35,9 @@ export const wordToMarkdown = (
   if (tags.length > 0) lines.push(`**分野**: ${tags.map((t) => `#${t}`).join(" ")}`, "");
   lines.push(`**URL**: ${absolute(wordPath(word.id), site)}`, "");
 
-  lines.push(`${h}# エンジニアが言う「${term}」`, "");
+  // 綴りは視点ごとに違いうる（ジェイソン ＝ JSON / Jason）ので、見出し語ではなく
+  // それぞれの節の見出しに添える。
+  lines.push(`${h}# エンジニアが言う「${term}」（${engineer.spelling}）`, "");
   STAGES.forEach((stage, i) => {
     lines.push(`- **${stage}**: ${engineer.levels[i]}`);
   });
@@ -46,7 +48,7 @@ export const wordToMarkdown = (
     lines.push("");
   }
 
-  lines.push(`${h}# ふつうに言う「${term}」`, "");
+  lines.push(`${h}# ふつうに言う「${term}」（${general.spelling}）`, "");
   lines.push(general.meaning, "");
   if (general.examples.length > 0) {
     lines.push("使う場面:", "");
@@ -82,7 +84,7 @@ export const buildLlmsTxt = (words: Word[], site: URL | undefined): string =>
     "",
     ...words.map(
       (word) =>
-        `- [${word.data.term}（${word.data.reading}）](${absolute(
+        `- [${word.data.term}（${spellingLabel(word)}）](${absolute(
           wordPath(word.id),
           site,
         )}): ${word.data.tldr}`,

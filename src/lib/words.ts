@@ -22,6 +22,29 @@ export const neighbors = (words: Word[], id: string) => {
   return { prev: words[i - 1], next: words[i + 1] };
 };
 
+/**
+ * 英語の綴り。2 視点で一致していれば 1 つ、食い違っていれば併記する。
+ *
+ *   フロート     → `float`
+ *   ジェイソン   → `JSON / Jason`
+ */
+export const spellingLabel = (word: Word): string => {
+  const { engineer, general } = word.data;
+  return engineer.spelling === general.spelling
+    ? engineer.spelling
+    : `${engineer.spelling} / ${general.spelling}`;
+};
+
+/**
+ * 見出し語に綴りを添えた表示名（`フロート（float）`）。
+ *
+ * 見出し語がカタカナになったぶん、英語の綴りで探しに来た人が着地できるよう
+ * **`<title>`・RSS・OGP はこの形で出す**。`h1` とパンくずは `term` だけ
+ * （中立な見出し語のまま揃える）。
+ */
+export const termLabel = (word: Word): string =>
+  `${word.data.term}（${spellingLabel(word)}）`;
+
 /** その語の最終更新日。`updatedAt` があればそれ、なければ公開日。 */
 export const lastModified = (word: Word): Date =>
   word.data.updatedAt ?? word.data.publishedAt;

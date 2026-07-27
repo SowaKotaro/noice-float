@@ -1,11 +1,12 @@
 ---
-term: "order"
+term: "オーダー"
 reading: "おーだー"
-aliases: ["オーダー", "順序", "並び順", "ORDER BY"]
+aliases: ["順序", "並び順", "ORDER BY"]
 
 tldr: "エンジニアが order と言うときは、データの並び順のこと。飲食店での注文ではない。"
 
 engineer:
+  spelling: "order"
   levels:
     - "並び順のこと。取り出したデータをどう並べるかを指定する。"
     - "並び順。SQL では ORDER BY で「この列の昇順で」と指定する。指定しなければ順番は保証されず、同じ問い合わせでも毎回違う順で返ってくることがある。"
@@ -16,6 +17,7 @@ engineer:
     - "その API、order は保証されてないよ"
 
 general:
+  spelling: "order"
   meaning: "飲食店などで注文すること。また、注文したもの。"
   examples:
     - "オーダーお願いします"

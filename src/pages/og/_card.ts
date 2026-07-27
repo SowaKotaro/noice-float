@@ -132,7 +132,7 @@ const senses = () =>
     ),
   ]);
 
-const layout = (headline: string, reading: string | null) =>
+const layout = (headline: string, sub: string | null) =>
   div(
     {
       width: WIDTH,
@@ -146,7 +146,7 @@ const layout = (headline: string, reading: string | null) =>
     [
       titleChip("そのフロート、アイス乗ってません！"),
 
-      // 語と読みは横並び（読みは語の足元にそろえる）。
+      // 語と綴りは横並び（綴りは語の足元にそろえる）。
       // 縦に積むと下段の 2 枚とぶつかるので、この段は 1 行に収めている。
       div({ alignItems: "flex-end", gap: 24, maxWidth: WIDTH - 112 }, [
         div(
@@ -159,7 +159,7 @@ const layout = (headline: string, reading: string | null) =>
           },
           headline,
         ),
-        reading
+        sub
           ? div(
               {
                 ...paper("#FFFFFF", 6),
@@ -168,7 +168,7 @@ const layout = (headline: string, reading: string | null) =>
                 fontSize: 30,
                 color: BLACK,
               },
-              reading,
+              sub,
             )
           : null,
       ]),
@@ -198,10 +198,10 @@ const render = async (node: Node): Promise<Buffer> => {
   );
 };
 
-/** 語ページ用。語と読みを載せる。 */
-export const wordOgImage = (term: string, reading: string) => {
-  warnMissingGlyphs(term + reading, `語「${term}」`);
-  return render(layout(term, reading));
+/** 語ページ用。見出し語（カタカナ）と英語の綴りを載せる。 */
+export const wordOgImage = (term: string, spelling: string) => {
+  warnMissingGlyphs(term + spelling, `語「${term}」`);
+  return render(layout(term, spelling));
 };
 
 /** トップと、語ページ以外すべての既定画像。 */

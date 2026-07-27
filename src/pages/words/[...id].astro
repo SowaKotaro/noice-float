@@ -14,7 +14,13 @@ import {
 import { SITE_NAME, ogImagePath, pageTitle, tagPath, wordPath } from "../../lib/site";
 import { TAGS } from "../../lib/tags";
 import { CHIP, LABEL } from "../../lib/ui";
-import { getSortedWords, isoDate, lastModified, neighbors } from "../../lib/words";
+import {
+  getSortedWords,
+  isoDate,
+  lastModified,
+  neighbors,
+  termLabel,
+} from "../../lib/words";
 
 export async function getStaticPaths() {
   const words = await getSortedWords();
@@ -47,8 +53,10 @@ const jsonLd = [
 const updated = lastModified(word);
 ---
 
+{/* `title` だけ「フロート（float）」と綴りを併記する。見出し語はカタカナなので、
+    英語で探しに来た人の着地点がここになる（`h1` とパンくずは中立な見出し語のまま）。 */}
 <Layout
-  title={pageTitle(word.data.term)}
+  title={pageTitle(termLabel(word))}
   description={word.data.tldr}
   ogImage={ogImagePath(word.id)}
   ogType="article"
