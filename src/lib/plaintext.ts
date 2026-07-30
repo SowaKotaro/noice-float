@@ -16,8 +16,6 @@
 import { SITE_DESCRIPTION, SITE_NAME, absolute, wordPath } from "./site";
 import { isoDate, lastModified, spellingLabel, type Word } from "./words";
 
-const STAGES = ["さらっと", "しっかり", "がっつり"] as const;
-
 /** 語 1 つぶんの Markdown。見出しレベルは埋め込み先に合わせて動かせる。 */
 export const wordToMarkdown = (
   word: Word,
@@ -38,10 +36,7 @@ export const wordToMarkdown = (
   // 綴りは視点ごとに違いうる（ジェイソン ＝ JSON / Jason）ので、見出し語ではなく
   // それぞれの節の見出しに添える。
   lines.push(`${h}# エンジニアが言う「${term}」（${engineer.spelling}）`, "");
-  STAGES.forEach((stage, i) => {
-    lines.push(`- **${stage}**: ${engineer.levels[i]}`);
-  });
-  lines.push("");
+  lines.push(engineer.description, "");
   if (engineer.examples.length > 0) {
     lines.push("使う場面:", "");
     engineer.examples.forEach((example) => lines.push(`- 「${example}」`));
@@ -71,9 +66,8 @@ export const siteIntro = (): string =>
     `> ${SITE_DESCRIPTION}`,
     "",
     "同じ語がエンジニアと非エンジニアで別のものを指してしまう——という",
-    "すれ違いを集めた辞書です。1 つの語について、エンジニア側の説明を",
-    "3 段階（さらっと / しっかり / がっつり）、日常側の説明を 1 つ、",
-    "そして両方の使用例を載せています。",
+    "すれ違いを集めた辞書です。1 つの語について、エンジニア側の説明と",
+    "日常側の説明を 1 つずつ、そして両方の使用例を載せています。",
     "",
   ].join("\n");
 

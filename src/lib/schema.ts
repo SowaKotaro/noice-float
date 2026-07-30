@@ -50,9 +50,8 @@ export const termSetNodes = (site: URL | undefined) => [
 /**
  * 語ページの中心。同じ URL に 2 つの `DefinedTerm` がぶら下がる形にする。
  *
- * エンジニア側の `description` には **`levels[2]`（がっつり）** を使う。
- * 検索されうる語（IEEE 754・一意インデックスなど）の密度が一番高く、
- * 引用されたときに情報量が最大になるため。
+ * `description` は両側ともカードに出ている説明そのもの
+ * （エンジニア側は `engineer.description`、ふつう側は `general.meaning`）。
  */
 export const wordNodes = (word: Word, site: URL | undefined) => {
   const url = absolute(wordPath(word.id), site);
@@ -66,7 +65,7 @@ export const wordNodes = (word: Word, site: URL | undefined) => {
       // 綴りは視点ごとに違いうる（ジェイソン ＝ JSON / Jason）ので、
       // `name` は中立な見出し語のまま、その視点の綴りを別名の先頭に置く。
       alternateName: [engineer.spelling, reading, ...aliases],
-      description: engineer.levels[2],
+      description: engineer.description,
       inDefinedTermSet: { "@id": termSetId("engineer", site) },
       url,
       inLanguage: "ja",
@@ -96,7 +95,7 @@ export const wordFaqNode = (word: Word, site: URL | undefined) => ({
     {
       "@type": "Question",
       name: `エンジニアが「${word.data.term}」と言うとき、どういう意味ですか？`,
-      acceptedAnswer: { "@type": "Answer", text: word.data.engineer.levels[2] },
+      acceptedAnswer: { "@type": "Answer", text: word.data.engineer.description },
     },
     {
       "@type": "Question",

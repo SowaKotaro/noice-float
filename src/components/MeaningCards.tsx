@@ -28,12 +28,16 @@ import type { LucideIcon } from "lucide-react";
  *   3. タブは角丸をやめて**付箋**に（角ばった形・少し傾ける・影で浮かせる）
  *
  * **2 枚は同じ骨格**（参考の ENGINEER カード側）で、違うのは色・付箋・アイコン・
- * チップ列・本文だけ。構造は下の `card()` 一か所で描いているので、
+ * 綴り・本文だけ。構造は下の `card()` 一か所で描いているので、
  * 差を付けたくなったら CARDS の表に足すこと。
  *
- *   見出しチップ（アイコン＋語＋綴り）／チップ列／本文／下段（透かし＋バッジ）
- *   ENGINEER … チップ列＝3 段階の切替、本文＝levels[n]
- *   GENERAL  … チップ列＝読み（切替はない）、本文＝ふつうの意味
+ *   見出しチップ（アイコン＋語＋綴り）／読みチップ／本文／下段（透かし＋バッジ）
+ *   ENGINEER … 本文＝エンジニア視点の説明
+ *   GENERAL  … 本文＝ふつうの意味
+ *
+ * かつて ENGINEER 側のチップ列は 3 段階（さらっと / しっかり / がっつり）の
+ * 切替ボタンだったが、説明を 1 本にまとめたのでなくなった。跡地は GENERAL と
+ * 同じ読みチップにしてある（2 枚の骨格を揃えるため）。
  *
  * 見出しの語（カタカナ）は 2 枚で同じで、**その隣の綴りだけが視点ごとに違う**
  * （フロートはどちらも `float`、ジェイソンなら `JSON` と `Jason`）。
@@ -44,8 +48,6 @@ import type { LucideIcon } from "lucide-react";
  * `href` を渡すと一覧用の静的プレビューになる（島として動かさない）。
  * このときカード全体が語ページへのリンクになり、ボタン類は span で出す。
  */
-
-const LEVELS = ["さらっと", "しっかり", "がっつり"] as const;
 
 type Side = "engineer" | "general";
 
@@ -114,10 +116,8 @@ interface Props {
   /** 見出し語（カタカナ）。2 枚で共通。 */
   term: string;
   reading: string;
-  engineer: { spelling: string; levels: string[]; examples: string[] };
+  engineer: { spelling: string; description: string; examples: string[] };
   general: { spelling: string; meaning: string; examples: string[] };
-  /** 0=さらっと, 1=しっかり, 2=がっつり。 */
-  defaultLevel?: number;
   defaultFront?: Side;
   /** 渡すと一覧用の静的プレビュー（カード全体がこの URL へのリンク）になる。 */
   href?: string;
@@ -133,13 +133,11 @@ export default function MeaningCards({
   reading,
   engineer,
   general,
-  defaultLevel = 1,
   defaultFront = "engineer",
   href,
   heading,
 }: Props) {
   const [front, setFront] = useState<Side>(defaultFront);
-  const [level, setLevel] = useState(defaultLevel);
 
   // 入替バッジの実体。押した瞬間にそのバッジは背面へ回って
   // `tabIndex={-1}` になるので、**新しく前面に来た側のバッジへ焦点を移す**。
@@ -197,51 +195,13 @@ export default function MeaningCards({
               <span className={HEAD_SPELLING}>{spelling[side]}</span>
             </div>
 
+            {/* 参考の技術スタックのチップ列にあたる位置。2 枚とも読みを置く。 */}
             <div className="mb-3 flex flex-wrap gap-1.5 sm:gap-2">
-              {side === "engineer" ? (
-                // 3 段階の切替。参考の技術スタックのチップ列にあたる。
-                LEVELS.map((label, i) =>
-                  preview ? (
-                    <span
-                      key={label}
-                      className={clsx(
-                        CHIP,
-                        i === level ? "bg-black text-white" : "bg-white",
-                      )}
-                    >
-                      {label}
-                    </span>
-                  ) : (
-                    <button
-                      key={label}
-                      type="button"
-                      aria-pressed={i === level}
-                      disabled={!isFront}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setLevel(i);
-                      }}
-                      className={clsx(
-                        CHIP,
-                        "cursor-pointer transition-all disabled:pointer-events-none",
-                        "active:translate-x-[2px] active:translate-y-[2px] active:shadow-none",
-                        i === level
-                          ? "bg-black text-white"
-                          : "bg-white hover:bg-black/10",
-                      )}
-                    >
-                      {label}
-                    </button>
-                  ),
-                )
-              ) : (
-                // GENERAL 側に切替はないので、同じ位置に読みを置いて骨格を揃える。
-                <span className={clsx(CHIP, "bg-white")}>{reading}</span>
-              )}
+              <span className={clsx(CHIP, "bg-white")}>{reading}</span>
             </div>
 
             <p className={BODY_TEXT}>
-              {side === "engineer" ? engineer.levels[level] : general.meaning}
+              {side === "engineer" ? engineer.description : general.meaning}
             </p>
           </div>
 
