@@ -46,9 +46,12 @@ export interface KanaGroup {
  *
  * **並べ替えはしない**（`getSortedWords` の順を行ごとに切り分けるだけ）ので、
  * 「一覧の隣」と「次の語」はここを通しても変わらない。
- * **語が 1 つも無い行は落とす**（今は な行・わ行が空。空の見出しだけが
- * 出ていると壊れて見えるため）。読みがひらがなで始まっていなければ
- * ビルドを止める（未定義タグと同じ思想）。
+ *
+ * **語が 0 の行も落とさず 10 行そのまま返す**（今は な行・わ行が空）。
+ * トップの索引が 5 列 × 2 段の固定マスなので、行が欠けるとマスが崩れる。
+ * 空の行は呼び出し側が薄く出して押せなくする。
+ *
+ * 読みがひらがなで始まっていなければビルドを止める（未定義タグと同じ思想）。
  */
 export const groupByKanaRow = (words: Word[]): KanaGroup[] => {
   const groups: KanaGroup[] = KANA_ROWS.map(([row]) => ({ row, words: [] }));
@@ -64,7 +67,7 @@ export const groupByKanaRow = (words: Word[]): KanaGroup[] => {
     groups[i].words.push(word);
   }
 
-  return groups.filter((group) => group.words.length > 0);
+  return groups;
 };
 
 /** 五十音順で見た前後の語。端は undefined（先頭の前・末尾の次は作らない）。 */
