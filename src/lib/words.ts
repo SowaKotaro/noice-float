@@ -16,6 +16,57 @@ export const getSortedWords = async (): Promise<Word[]> =>
     a.data.reading.localeCompare(b.data.reading, "ja"),
   );
 
+/**
+ * 五十音の行。**見出しの並びは あかさたなはまやらわ で固定**する。
+ *
+ * 各行の文字列には濁点・半濁点・小書きのかなも入れてある（`じぇいそん` は
+ * さ行、`ぱす` は は行、`ぞんび` は さ行）。読みの先頭 1 文字をここから引く。
+ */
+const KANA_ROWS = [
+  ["あ", "あいうえおぁぃぅぇぉゔ"],
+  ["か", "かきくけこがぎぐげごゕゖ"],
+  ["さ", "さしすせそざじずぜぞ"],
+  ["た", "たちつてとだぢづでどっ"],
+  ["な", "なにぬねの"],
+  ["は", "はひふへほばびぶべぼぱぴぷぺぽ"],
+  ["ま", "まみむめも"],
+  ["や", "やゆよゃゅょ"],
+  ["ら", "らりるれろ"],
+  ["わ", "わをんゎ"],
+] as const;
+
+export interface KanaGroup {
+  /** 行の頭のかな（`あ`）。表示は `あ行`。 */
+  row: string;
+  words: Word[];
+}
+
+/**
+ * 読みの頭で語を五十音の行にまとめる。辞書の索引の見立て。
+ *
+ * **並べ替えはしない**（`getSortedWords` の順を行ごとに切り分けるだけ）ので、
+ * 「一覧の隣」と「次の語」はここを通しても変わらない。
+ * **語が 1 つも無い行は落とす**（今は な行・わ行が空。空の見出しだけが
+ * 出ていると壊れて見えるため）。読みがひらがなで始まっていなければ
+ * ビルドを止める（未定義タグと同じ思想）。
+ */
+export const groupByKanaRow = (words: Word[]): KanaGroup[] => {
+  const groups: KanaGroup[] = KANA_ROWS.map(([row]) => ({ row, words: [] }));
+
+  for (const word of words) {
+    const head = word.data.reading.slice(0, 1);
+    const i = KANA_ROWS.findIndex(([, kana]) => kana.includes(head));
+    if (i < 0) {
+      throw new Error(
+        `${word.id}: reading「${word.data.reading}」が五十音で始まっていない。reading はひらがなで書く。`,
+      );
+    }
+    groups[i].words.push(word);
+  }
+
+  return groups.filter((group) => group.words.length > 0);
+};
+
 /** 五十音順で見た前後の語。端は undefined（先頭の前・末尾の次は作らない）。 */
 export const neighbors = (words: Word[], id: string) => {
   const i = words.findIndex((word) => word.id === id);

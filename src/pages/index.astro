@@ -11,9 +11,13 @@ import {
 import { SITE_DESCRIPTION, pageTitle, tagPath, wordPath } from "../lib/site";
 import { TAGS, type TagName } from "../lib/tags";
 import { LABEL } from "../lib/ui";
-import { getSortedWords } from "../lib/words";
+import { getSortedWords, groupByKanaRow } from "../lib/words";
 
 const words = await getSortedWords();
+
+// 一覧は辞書の索引の見立てで、読みの頭で あかさたなはまやらわ にまとめる。
+// 語が無い行は出ない（今は な行・わ行が空）。
+const kanaGroups = groupByKanaRow(words);
 
 // 代表例は float。サイト名の由来であり、切り替わるカードそのものを見せたいので
 // 一覧の上に 1 語だけ操作できる状態で置いてある（島）。
@@ -73,23 +77,36 @@ const jsonLd = [
     <section id="words" class="scroll-mt-24">
       <h2 class={LABEL}>ことば一覧 / {words.length} 語</h2>
 
-      <ul class="mt-6 flex flex-wrap gap-3 sm:gap-4">
+      <div class="mt-6 flex flex-col gap-8">
         {
-          words.map((word) => (
-            <li>
-              <a
-                href={wordPath(word.id)}
-                class={
-                  buttonVariants({ variant: "outline", size: "lg" }) +
-                  " bg-white text-lg font-black tracking-wider uppercase sm:text-xl"
-                }
-              >
-                {word.data.term}
-              </a>
-            </li>
+          kanaGroups.map((group) => (
+            <section class="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5">
+              {/* 索引のつまみ。差し色の面に黒文字＋オフセット影で、
+                  カードやタグと同じ「黒枠＋色面」の作りに揃えてある。 */}
+              <h3 class="bg-primary inline-flex h-11 w-11 shrink-0 items-center justify-center border-2 border-black font-black text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                <span class="text-xl">{group.row}</span>
+                <span class="text-xs">行</span>
+              </h3>
+
+              <ul class="flex flex-wrap gap-3 sm:gap-4">
+                {group.words.map((word) => (
+                  <li>
+                    <a
+                      href={wordPath(word.id)}
+                      class={
+                        buttonVariants({ variant: "outline", size: "lg" }) +
+                        " bg-white text-lg font-black tracking-wider uppercase sm:text-xl"
+                      }
+                    >
+                      {word.data.term}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))
         }
-      </ul>
+      </div>
     </section>
 
     {/* 分野から引く導線。語ページ同士をつなぐ内部リンクの幹でもある。 */}

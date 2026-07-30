@@ -176,7 +176,7 @@ URL は `term` ではなく**ファイル名（`word.id`）**なので、見出�
 | `src/lib/site.ts` | サイト定数と**絶対 URL の唯一の出どころ**。起点は `astro.config.mjs` の `site` |
 | `src/lib/schema.ts` | JSON-LD。`DefinedTerm` を 2 ノード（エンジニア／ふつう）＋ `FAQPage` ＋ パンくず |
 | `src/lib/plaintext.ts` | `llms.txt` / `llms-full.txt` / `/words/<語>.md` の生成。3 つとも同じ関数から作る |
-| `src/lib/words.ts` | 語の取得と**並び順の一本化**（読みの五十音順）。前後ナビ、綴り併記（`spellingLabel` / `termLabel`）、説明＋「要は」の連結（`engineerText`）もここ |
+| `src/lib/words.ts` | 語の取得と**並び順の一本化**（読みの五十音順）。行ごとのまとめ（`groupByKanaRow`）、前後ナビ、綴り併記（`spellingLabel` / `termLabel`）、説明＋「要は」の連結（`engineerText`）もここ |
 | `src/lib/ui.ts` | 複数ページで使う装飾クラス（黒ラベル・白チップ・白い箱） |
 | `src/pages/og/_card.ts` | OGP 画像のレイアウト。`_` 始まりなのでルートにならない |
 | `src/components/ui/` | shadcn CLI で取り込んだ RetroUI コンポーネント。手で書き換えてよい |
@@ -215,6 +215,11 @@ URL は `term` ではなく**ファイル名（`word.id`）**なので、見出�
 
 **トップの一覧は見出し語だけ**を並べる（意味は語ページで読む）。ただし float は
 サイトの根幹なので、一覧の上に**操作できる切り替わりカードを代表例として 1 枚**置いてある。
+
+一覧は辞書の索引の見立てで、**読みの頭で あかさたなはまやらわ の行にまとめる**
+（`words.ts` の `groupByKanaRow`）。行の見出しは差し色の四角いつまみ。並べ替えは
+していない（五十音順を行ごとに切り分けるだけ）ので前後ナビとずれない。
+**語が 1 つも無い行は出さない**（今は な行・わ行が空。空の見出しは壊れて見える）。
 
 `global.css` の CSS 変数は**参考の配色に合わせて書き換えてある**（`--background` は
 violet-300、`--engineer` は `#4ECDC4`、`--general` は `#FFD166`、`--border` は純黒）。
