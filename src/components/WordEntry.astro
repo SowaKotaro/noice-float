@@ -5,13 +5,12 @@
  * これがある理由は 2 つある。
  *
  * 1. **クローラと LLM に全文を届けるため。** 意味カードは React 島なので、
- *    HTML に文字として出るのは `levels[1]` と前面側の用例だけ。残り
- *    （`levels[0]` / `levels[2]` / もう一方の用例 / `aliases`）は
- *    `<astro-island props="...">` の**属性値の中**にしか無く、
- *    検索エンジンも AI クローラも本文として扱わない。
+ *    HTML に文字として出るのは 2 つの意味と**前面側の用例だけ**。残り
+ *    （もう一方の用例と `aliases`）は `<astro-island props="...">` の
+ *    **属性値の中**にしか無く、検索エンジンも AI クローラも本文として扱わない。
  * 2. **カードが構造上できないことをやるため。** カードは 2 つの意味を
- *    重ねて隠す作りなので、3 段階を見比べることも、両方の意味を同時に
- *    読むこともできない。ここはその逆で、全部を一度に並べる。
+ *    重ねて隠す作りなので、両方の意味を並べて読むことも、用例を見比べる
+ *    こともできない。ここはその逆で、全部を一度に並べる。
  *
  * したがって**カードの表示と内容が重複するのは意図的**。上が体験、ここが記録。
  *
@@ -31,11 +30,7 @@ interface Props {
 const { word } = Astro.props;
 const { term, reading, aliases, engineer, general } = word.data;
 
-const STAGES = ["さらっと", "しっかり", "がっつり"] as const;
-
 const HEAD = "flex items-center gap-2 border-b-4 border-black px-5 py-3 text-lg font-black tracking-wider sm:text-xl";
-const DT = "mb-1 inline-block border-2 border-black bg-black px-2 py-0.5 text-xs font-black tracking-widest text-white sm:text-sm";
-const DD = "mb-5 leading-relaxed font-bold text-black last:mb-0";
 const SUBHEAD = "mb-2 text-sm font-black tracking-widest text-black/50 uppercase";
 // 視点ごとの綴り。見出し語（カタカナ）は 2 視点で共通で、ここだけが食い違いうる
 // （ジェイソン ＝ JSON / Jason）。カードでは黒帯の中に出している位置。
@@ -46,7 +41,7 @@ const SPELL = "text-xs font-black tracking-wider text-black/50 sm:text-sm";
   <h2 id="entry-heading" class={LABEL}>辞書エントリ / {term}</h2>
 
   <div class={`mt-6 ${PAPER}`}>
-    {/* エンジニア側：3 段階を全部並べる。カードでは 1 つずつしか読めない。 */}
+    {/* エンジニア側。説明 1 本と用例。 */}
     <h3 class={`${HEAD} bg-[#4ECDC4]`}>
       <Terminal size={22} aria-hidden="true" />
       エンジニアの「{term}」
@@ -54,16 +49,7 @@ const SPELL = "text-xs font-black tracking-wider text-black/50 sm:text-sm";
     </h3>
 
     <div class="px-5 py-5 sm:px-7">
-      <dl>
-        {
-          STAGES.map((stage, i) => (
-            <>
-              <dt class={DT}>{stage}</dt>
-              <dd class={DD}>{engineer.levels[i]}</dd>
-            </>
-          ))
-        }
-      </dl>
+      <p class="leading-relaxed font-bold text-black">{engineer.description}</p>
 
       {
         engineer.examples.length > 0 && (
