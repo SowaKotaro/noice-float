@@ -91,11 +91,16 @@ const CARD_FRONT =
 const CARD_BACK =
   "z-0 translate-x-4 translate-y-4 sm:translate-x-6 sm:translate-y-6 rotate-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
 // 付箋。角は丸めず（角ばらせる）、手で貼ったように少し傾け、影で浮かせる。
-// 高さと `-top-*` は、**背面に回ったカードでもラベルが前面カードの上端より
-// 上に残る**ように決めてある（背面は右下へ 16/24px ずれるので、その分の逃げが要る）。
-// 下端 8px はカードに重ねて、貼り付いている感じを出している。
+// 下端 8px はカードに重ねて、貼り付いている感じを出している（`h-*` − `-top-*` ＝ 8）。
+// 背面に回ると右下へ 16/24px ずれるので、その分ラベルが前面カードに食われる。
+// 高さを詰めたぶん**付箋の面は隠れてよいが、文字（大文字なので下に出る部分がない）は
+// 上端より上に残る**ように `pt-3` を決めてある（下げると背面でラベルが切れる）。
+// ラベルは `font-black`（Tailwind の上限）なのでウェイトでは強められない。
+// 代わりに**字間を `tracking-wide` まで詰めて塊として太く見せている**
+// （参考ファイルと `WordEntry` の小見出しは `tracking-widest`。ここだけ違うのは
+// ユーザー指示。付箋そのものが参考からの意図的な逸脱なので合わせに戻さない）。
 const TAB_BASE =
-  "absolute -top-16 sm:-top-20 w-32 sm:w-36 h-18 sm:h-22 border-4 border-black flex items-start justify-center pt-3 sm:pt-3.5 font-black text-sm sm:text-base tracking-widest z-[-1] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] select-none";
+  "absolute -top-12 sm:-top-14 w-32 sm:w-36 h-14 sm:h-16 border-4 border-black flex items-start justify-center pt-3 font-black text-base sm:text-lg tracking-wide z-[-1] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] select-none";
 // 入替バッジ。2 枚とも同じ形・同じ並び（ラベル → アイコン）で、行き先の名前だけが違う。
 const BADGE =
   "shrink-0 whitespace-nowrap text-xs sm:text-sm font-black flex items-center gap-1.5 bg-white px-2 py-1 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all group-active:shadow-none group-active:translate-y-[2px] group-active:translate-x-[2px]";
