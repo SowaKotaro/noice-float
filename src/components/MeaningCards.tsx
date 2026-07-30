@@ -116,12 +116,23 @@ const HEAD_CHIP =
 const HEAD_SPELLING = "text-xs font-black tracking-wider text-white/60 sm:text-sm";
 const BODY_TEXT =
   "border-b-4 border-black/20 pb-2 text-sm leading-relaxed font-bold text-black sm:text-base";
+// 「要は」の 1 行。**ENGINEER カードにだけ出る**（2 枚の骨格を揃える方針の唯一の例外。
+// ふつう側の説明はもともと平たい言葉なので、言い直す相手が居ない）。
+// 本文の `border-b-4` がそのまま本文との仕切りになるので、ここに罫線は足さない。
+// 本文が `font-bold` でこちらが `font-black` なのは、締めの言い切りだから。
+const GIST_TEXT = "mt-2 text-sm leading-relaxed font-black text-black sm:text-base";
 
 interface Props {
   /** 見出し語（カタカナ）。2 枚で共通。 */
   term: string;
   reading: string;
-  engineer: { spelling: string; description: string; examples: string[] };
+  engineer: {
+    spelling: string;
+    description: string;
+    /** 専門用語なしで言い直した「要は」の 1 行。ENGINEER 側だけが持つ。 */
+    gist: string;
+    examples: string[];
+  };
   general: { spelling: string; meaning: string; examples: string[] };
   defaultFront?: Side;
   /** 渡すと一覧用の静的プレビュー（カード全体がこの URL へのリンク）になる。 */
@@ -208,6 +219,9 @@ export default function MeaningCards({
             <p className={BODY_TEXT}>
               {side === "engineer" ? engineer.description : general.meaning}
             </p>
+
+            {/* 専門用語なしの言い直し。ENGINEER カードにだけ付く。 */}
+            {side === "engineer" && <p className={GIST_TEXT}>{engineer.gist}</p>}
           </div>
 
           <div className="mt-4 flex items-end justify-between gap-3">

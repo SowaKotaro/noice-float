@@ -12,6 +12,7 @@
 
 import type { CollectionEntry } from "astro:content";
 import { SITE_DESCRIPTION, SITE_NAME, absolute, tagPath, wordPath } from "./site";
+import { engineerText } from "./words";
 
 type Word = CollectionEntry<"words">;
 
@@ -51,7 +52,8 @@ export const termSetNodes = (site: URL | undefined) => [
  * 語ページの中心。同じ URL に 2 つの `DefinedTerm` がぶら下がる形にする。
  *
  * `description` は両側ともカードに出ている説明そのもの
- * （エンジニア側は `engineer.description`、ふつう側は `general.meaning`）。
+ * （エンジニア側は `engineer.description` ＋ 「要は」の言い直し、
+ * ふつう側は `general.meaning`）。連結は `engineerText()` の 1 か所だけ。
  */
 export const wordNodes = (word: Word, site: URL | undefined) => {
   const url = absolute(wordPath(word.id), site);
@@ -65,7 +67,7 @@ export const wordNodes = (word: Word, site: URL | undefined) => {
       // 綴りは視点ごとに違いうる（ジェイソン ＝ JSON / Jason）ので、
       // `name` は中立な見出し語のまま、その視点の綴りを別名の先頭に置く。
       alternateName: [engineer.spelling, reading, ...aliases],
-      description: engineer.description,
+      description: engineerText(word),
       inDefinedTermSet: { "@id": termSetId("engineer", site) },
       url,
       inLanguage: "ja",
@@ -95,7 +97,7 @@ export const wordFaqNode = (word: Word, site: URL | undefined) => ({
     {
       "@type": "Question",
       name: `エンジニアが「${word.data.term}」と言うとき、どういう意味ですか？`,
-      acceptedAnswer: { "@type": "Answer", text: word.data.engineer.description },
+      acceptedAnswer: { "@type": "Answer", text: engineerText(word) },
     },
     {
       "@type": "Question",
