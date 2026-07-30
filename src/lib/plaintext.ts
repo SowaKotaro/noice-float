@@ -37,6 +37,8 @@ export const wordToMarkdown = (
   // それぞれの節の見出しに添える。
   lines.push(`${h}# エンジニアが言う「${term}」（${engineer.spelling}）`, "");
   lines.push(engineer.description, "");
+  // 専門用語なしの言い直し。段落を分けて出す（HTML 側も本文とは別の行）。
+  lines.push(engineer.gist, "");
   if (engineer.examples.length > 0) {
     lines.push("使う場面:", "");
     engineer.examples.forEach((example) => lines.push(`- 「${example}」`));

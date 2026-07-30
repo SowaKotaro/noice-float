@@ -45,6 +45,17 @@ export const spellingLabel = (word: Word): string => {
 export const termLabel = (word: Word): string =>
   `${word.data.term}（${spellingLabel(word)}）`;
 
+/**
+ * エンジニア側の説明の全文（`description` ＋ 「要は」の 1 行）。
+ *
+ * カードと辞書エントリはこの 2 つを続けて出しているので、**JSON-LD の
+ * description と FAQ の答えも同じ 2 つ**にする。片方だけにすると
+ * 「ページに書いてあるとおりを機械可読で渡す」という前提が崩れる。
+ * 言い直しの 1 行は専門用語がなく、そのまま引用されやすい形でもある。
+ */
+export const engineerText = (word: Word): string =>
+  `${word.data.engineer.description}\n${word.data.engineer.gist}`;
+
 /** その語の最終更新日。`updatedAt` があればそれ、なければ公開日。 */
 export const lastModified = (word: Word): Date =>
   word.data.updatedAt ?? word.data.publishedAt;

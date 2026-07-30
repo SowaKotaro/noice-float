@@ -51,7 +51,11 @@
 |---|---|---|
 | 綴り | `engineer.spelling` | `general.spelling` |
 | 本文 | `engineer.description` | `general.meaning` |
+| 本文の下 | `engineer.gist`（「要は」の 1 行） | **無し**（唯一の例外） |
 | アイコン | `Terminal` | `Smile` |
+
+骨格が揃わないのは**本文の下の 1 行だけ**で、これはユーザー指示による意図的な例外。
+理由と書き方は下の「エンジニア視点の説明文」にある。
 
 チップ列（参考の技術スタックの位置）は**2 枚とも読み**で、中身も同じ。
 かつて ENGINEER 側だけ 3 段階の切替ボタンだったが、説明を 1 本にしたので
@@ -98,6 +102,27 @@
 
 口語のノリは `examples`（用例）が担当なので、そちらは煽りのままでよい。
 
+### 「要は」の 1 行（`engineer.gist`）
+
+**説明のいちばん最後に、専門用語をひとつも使わずに言い直した 1 行を足す**（必須項目）。
+上の `description` が「正確さを保ったまま平易に」なら、こちらは
+**正確さを捨てて伝わることだけを取る**。「お母さんに説明するくらい、諦めて、
+わかりやすく」がユーザーの言葉。比喩で言い切ってよい。
+
+- **`要は` から始める。** 接頭辞ごと frontmatter に持つ（`content.config.ts` の
+  `startsWith` で強制）。**描画側で「要は」を足さないこと**。文字列を組み立てると
+  カード・辞書エントリ・llms.txt・JSON-LD で文言がずれる
+- **カタカナの専門語を残さない。** データ型・プロセス・ポインタ・インタプリタなどは
+  噛み砕くか捨てる（`ソルト` のような見出し語そのものは出してよい）
+- 1〜2 文。長い補足が要るならそれは `description` の仕事
+- 上の「入れない」のうち**比喩の禁止だけはここでは外れる**（たい焼きの型、洗った皿、
+  合鍵、グラム）。煽りと実践上の勧めは変わらず入れない
+
+**この 1 行は ENGINEER 側にしか無い**（`general.meaning` はもともと平たい言葉なので
+言い直す相手が居ない）。**「2 枚のカードの骨格を揃える」方針の唯一の例外**で、
+`MeaningCards.tsx` の `card()` に `side === "engineer"` の分岐が 1 つだけある。
+GENERAL 側に空の枠を作ったり、揃えるために消したりしないこと。
+
 > 旧方式は 2 つあった。**部分列制約＋CSS 切替**（`subsequence.ts` / `levelize.ts` /
 > `LevelText.astro` / `EngineerSlider.tsx`。いずれも現存しない）と、その次の
 > **3 段階の独立文＋React の切替ボタン**（`engineer.levels` を `length(3)` で検証）。
@@ -143,7 +168,7 @@ URL は `term` ではなく**ファイル名（`word.id`）**なので、見出�
 
 | パス | 役割 |
 |---|---|
-| `src/content.config.ts` | Zod スキーマ（`term` はカタカナ、`spelling` は両側必須、`engineer.description` の書き方、タグは統制語彙） |
+| `src/content.config.ts` | Zod スキーマ（`term` はカタカナ、`spelling` は両側必須、`engineer.description` の書き方、`engineer.gist` は「要は」始まり、タグは統制語彙） |
 | `refs/NeoBrutalismCards.tsx` | デザインの原典。見た目で迷ったらこれに合わせる |
 | `src/components/MeaningCards.tsx` | 重なる意味カード。唯一の状態（どちらが前面か）を持つ island（`href` を渡すと一覧用の静的プレビュー） |
 | `src/lib/tags.ts` | タグの統制語彙（tech/daily の 2 世界）。未定義タグはビルド停止 |
@@ -151,7 +176,7 @@ URL は `term` ではなく**ファイル名（`word.id`）**なので、見出�
 | `src/lib/site.ts` | サイト定数と**絶対 URL の唯一の出どころ**。起点は `astro.config.mjs` の `site` |
 | `src/lib/schema.ts` | JSON-LD。`DefinedTerm` を 2 ノード（エンジニア／ふつう）＋ `FAQPage` ＋ パンくず |
 | `src/lib/plaintext.ts` | `llms.txt` / `llms-full.txt` / `/words/<語>.md` の生成。3 つとも同じ関数から作る |
-| `src/lib/words.ts` | 語の取得と**並び順の一本化**（読みの五十音順）。前後ナビと、綴り併記（`spellingLabel` / `termLabel`）もここ |
+| `src/lib/words.ts` | 語の取得と**並び順の一本化**（読みの五十音順）。前後ナビ、綴り併記（`spellingLabel` / `termLabel`）、説明＋「要は」の連結（`engineerText`）もここ |
 | `src/lib/ui.ts` | 複数ページで使う装飾クラス（黒ラベル・白チップ・白い箱） |
 | `src/pages/og/_card.ts` | OGP 画像のレイアウト。`_` 始まりなのでルートにならない |
 | `src/components/ui/` | shadcn CLI で取り込んだ RetroUI コンポーネント。手で書き換えてよい |
@@ -217,6 +242,10 @@ violet-300、`--engineer` は `#4ECDC4`、`--general` は `#FFD166`、`--border`
 - **`tldr` は 1 語 1 文の言い切り**（「エンジニアが X と言うときは〜。〜ではない。」）。
   meta description・OGP・JSON-LD の description・ページ冒頭の 4 か所に**同じ文**が入る。
   出どころは 1 つ（frontmatter）なのでずれない。必須項目
+- **`engineer.gist`（「要は」の 1 行）は説明とセットで扱う。** カードと辞書エントリが
+  説明の直後に出しているので、**JSON-LD の `description` と FAQ の答えも
+  `engineerText()`（説明 ＋ 言い直し）**にしてある。専門用語のない 1 文なので、
+  AI 検索にはこの行がそのまま引かれる見込み。連結は `words.ts` の 1 か所だけ
 - **語の並び順は `src/lib/words.ts` の五十音順に一本化**。一覧・前後ナビ・
   llms.txt が別々に並べ替えると「一覧の隣」と「次の語」がずれる
 - **OGP 画像に説明文は載せない。** 載せると任意の漢字が要り、同梱フォントが
