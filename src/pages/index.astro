@@ -10,10 +10,26 @@ import {
 } from "../lib/schema";
 import { SITE_DESCRIPTION, pageTitle, tagPath, wordPath } from "../lib/site";
 import { TAGS, type TagName } from "../lib/tags";
-import { LABEL } from "../lib/ui";
-import { getSortedWords } from "../lib/words";
+import { CHIP, LABEL } from "../lib/ui";
+import { getSortedWords, groupByKanaRow } from "../lib/words";
 
 const words = await getSortedWords();
+
+// 一覧は辞書の小口（つめ）の見立てで、読みの頭で あかさたなはまやらわ にまとめる。
+// 5 列 × 2 段の固定マスなので、語が 0 の行（今は な・わ）も薄く出して押せなくする。
+// 語が増えてもトップが伸びないよう、**最初は行のマスだけ**を見せて畳んでおく。
+const kanaGroups = groupByKanaRow(words);
+
+// マスの色は 5 色の巡回＝列ごとに同じ色。全部サイトの持ち色（エンジニア・ふつう・
+// 差し色・白・薄紫）から取っている。傾きは付箋と同じ手貼りの見立てで、
+// 隣どうしが同じ角度にならないようにずらしてある。
+const TILE_STYLES = [
+  "bg-[#4ECDC4] -rotate-2",
+  "bg-[#FFD166] rotate-2",
+  "bg-[#FF6B6B] -rotate-1",
+  "bg-white rotate-1",
+  "bg-[#DDD6FE] -rotate-2",
+];
 
 // 代表例は float。サイト名の由来であり、切り替わるカードそのものを見せたいので
 // 一覧の上に 1 語だけ操作できる状態で置いてある（島）。
@@ -69,27 +85,92 @@ const jsonLd = [
       )
     }
 
-    {/* 一覧は見出し語だけ。意味はそれぞれの語ページで読む。 */}
-    <section id="words" class="scroll-mt-24">
+    {/* 一覧は見出し語だけ。意味はそれぞれの語ページで読む。
+        行のマスを押すと、その行のことばがマスの下（`order-1` で必ず最後尾）に出る。
+        開け閉めは sr-only のラジオ ＋ 兄弟セレクタでやっていて JS は要らない。
+        40 語ぶんのリンクは畳んでいるときも HTML に居る（display:none なだけ）。 */}
+    <section id="words" class="kana scroll-mt-24">
       <h2 class={LABEL}>ことば一覧 / {words.length} 語</h2>
 
-      <ul class="mt-6 flex flex-wrap gap-3 sm:gap-4">
+      <p class="mt-4 text-sm font-bold text-black">
+        行をえらぶと、その行のことばが出ます。
+      </p>
+
+      {/* 「どれも開いていない」状態。初期値であり、パネルの ✕ の戻り先でもある
+          （ラジオは自分では外せないので、空の選択肢を 1 つ用意しておく）。 */}
+      <input id="kana-none" class="sr-only" type="radio" name="kana" checked />
+
+      <div class="mt-6 grid grid-cols-5 gap-2 sm:gap-4">
         {
-          words.map((word) => (
-            <li>
-              <a
-                href={wordPath(word.id)}
-                class={
-                  buttonVariants({ variant: "outline", size: "lg" }) +
-                  " bg-white text-lg font-black tracking-wider uppercase sm:text-xl"
-                }
+          kanaGroups.map((group, i) => (
+            <Fragment>
+              <input
+                id={`kana-${group.row}`}
+                class="kana-input sr-only"
+                type="radio"
+                name="kana"
+                disabled={group.words.length === 0}
+              />
+
+              <label
+                for={`kana-${group.row}`}
+                class:list={[
+                  "kana-tile relative flex aspect-square items-center justify-center border-4 border-black font-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-200",
+                  TILE_STYLES[i % TILE_STYLES.length],
+                  group.words.length === 0
+                    ? "cursor-default opacity-40"
+                    : "cursor-pointer",
+                ]}
               >
-                {word.data.term}
-              </a>
-            </li>
+                <span class="text-2xl sm:text-4xl">{group.row}</span>
+                <span class="sr-only">行（{group.words.length} 語）</span>
+
+                {/* 語数の小札。マスの右下にちょこんと貼ってある。 */}
+                <span
+                  aria-hidden="true"
+                  class="absolute -right-1 -bottom-1 border-2 border-black bg-white px-1 text-[10px] leading-tight sm:text-xs"
+                >
+                  {group.words.length}
+                </span>
+              </label>
+
+              {/* 空の行にはパネルを作らない（そもそもマスが押せない）。 */}
+              {group.words.length > 0 && (
+                <div class="kana-panel order-1 col-span-full border-4 border-black bg-white p-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:p-5">
+                  <div class="mb-4 flex items-center justify-between gap-3">
+                    <h3 class={CHIP}>
+                      {group.row}行 / {group.words.length} 語
+                    </h3>
+
+                    <label
+                      for="kana-none"
+                      class="cursor-pointer border-2 border-black bg-[#FF6B6B] px-2 py-0.5 text-xs font-black text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                    >
+                      とじる ✕
+                    </label>
+                  </div>
+
+                  <ul class="flex flex-wrap gap-3 sm:gap-4">
+                    {group.words.map((word) => (
+                      <li>
+                        <a
+                          href={wordPath(word.id)}
+                          class={
+                            buttonVariants({ variant: "outline", size: "lg" }) +
+                            " bg-white text-lg font-black tracking-wider uppercase hover:-rotate-2 sm:text-xl"
+                          }
+                        >
+                          {word.data.term}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </Fragment>
           ))
         }
-      </ul>
+      </div>
     </section>
 
     {/* 分野から引く導線。語ページ同士をつなぐ内部リンクの幹でもある。 */}
@@ -117,3 +198,57 @@ const jsonLd = [
     </section>
   </div>
 </Layout>
+
+{/* 索引の開け閉め。ラジオ（sr-only）と兄弟セレクタだけで作ってあり JS は無い。
+    DOM の並びが input → label → panel なので、隣接セレクタ 2 段でその行の
+    パネルだけを開ける（`~` にすると後ろの行まで開くので `+` で繋ぐこと）。 */}
+<style>
+  /* 押せる行だけホバーで左上に浮く。空の行（な・わ）は動かない。 */
+  .kana-input:not(:disabled) + .kana-tile:hover {
+    translate: -2px -2px;
+    box-shadow: 6px 6px 0 0 rgba(0, 0, 0, 1);
+  }
+
+  /* 選ばれた行は傾きが取れてまっすぐ立ち、いちばん高く浮く。 */
+  .kana-input:checked + .kana-tile {
+    rotate: 0deg;
+    translate: -3px -3px;
+    box-shadow: 8px 8px 0 0 rgba(0, 0, 0, 1);
+  }
+
+  /* ラジオは sr-only なのでフォーカスリングを札の側に出す（キーボードで
+     矢印キーを押すと行が移る）。 */
+  .kana-input:focus-visible + .kana-tile {
+    outline: 3px dashed rgba(0, 0, 0, 1);
+    outline-offset: 4px;
+  }
+
+  .kana-panel {
+    display: none;
+  }
+
+  .kana-input:checked + .kana-tile + .kana-panel {
+    display: block;
+    animation: kana-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes kana-pop {
+    from {
+      opacity: 0;
+      translate: 0 -8px;
+      scale: 0.98;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kana-tile {
+      transition: none;
+    }
+    .kana-input:checked + .kana-tile + .kana-panel {
+      animation: none;
+    }
+  }
+</style>
