@@ -41,8 +41,8 @@ export const termSetNodes = (site: URL | undefined) => [
   {
     "@type": "DefinedTermSet",
     "@id": termSetId("general", site),
-    name: "ふつうに使う意味",
-    description: "エンジニアでない人が日常で使うときの意味。",
+    name: "非エンジニアが使う意味",
+    description: "非エンジニアが日常で使うときの意味。",
     inLanguage: "ja",
     isPartOf: { "@id": absolute("/#website", site) },
   },
@@ -53,7 +53,7 @@ export const termSetNodes = (site: URL | undefined) => [
  *
  * `description` は両側ともカードに出ている説明そのもの
  * （エンジニア側は `engineer.description` ＋ 「要は」の言い直し、
- * ふつう側は `general.meaning`）。連結は `engineerText()` の 1 か所だけ。
+ * 非エンジニア側は `general.meaning`）。連結は `engineerText()` の 1 か所だけ。
  */
 export const wordNodes = (word: Word, site: URL | undefined) => {
   const url = absolute(wordPath(word.id), site);
@@ -86,7 +86,7 @@ export const wordNodes = (word: Word, site: URL | undefined) => {
 };
 
 /**
- * 「エンジニアと一般で何が違うのか」を Q&A の形でも出しておく。
+ * 「エンジニアと非エンジニアで何が違うのか」を Q&A の形でも出しておく。
  * AI 検索と AI Overviews は質問文と答えの対を強く好むので、
  * ページに書いてあるとおりの内容を機械可読な形で重ねて渡す狙い。
  */
@@ -101,7 +101,7 @@ export const wordFaqNode = (word: Word, site: URL | undefined) => ({
     },
     {
       "@type": "Question",
-      name: `「${word.data.term}」のふつうの意味は何ですか？`,
+      name: `非エンジニアが「${word.data.term}」と言うとき、どういう意味ですか？`,
       acceptedAnswer: { "@type": "Answer", text: word.data.general.meaning },
     },
   ],

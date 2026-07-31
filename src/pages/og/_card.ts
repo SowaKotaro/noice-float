@@ -26,7 +26,7 @@ import satori from "satori";
  * **ここに無い文字を下のレイアウトへ書くと豆腐になる**。文言を足したら
  * `python3 scripts/subset-og-font.py` を実行し直すこと。
  */
-export const OG_FIXED_TEXT = `そのフロート、アイス乗ってません！エンジニアの意味ふつうの意味エンジニアと非エンジニアで意味の違うことば辞典`;
+export const OG_FIXED_TEXT = `そのフロート、アイス乗ってません！エンジニアの意味非エンジニアの意味エンジニアと非エンジニアで意味の違うことば辞典`;
 
 const WIDTH = 1200;
 const HEIGHT = 630;
@@ -129,7 +129,7 @@ const senses = () =>
         alignItems: "center",
         justifyContent: "center",
       },
-      "ふつうの意味",
+      "非エンジニアの意味",
     ),
   ]);
 

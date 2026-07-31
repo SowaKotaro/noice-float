@@ -23,7 +23,7 @@ const worldLabel = def.world === "tech" ? "エンジニア側" : "日常側";
 
 const description = `「${tag}」の分野の語（${def.description}）。${words
   .map((w) => w.data.term)
-  .join("・")} の ${words.length} 語を、エンジニアとふつうの両方の意味で引けます。`;
+  .join("・")} の ${words.length} 語を、エンジニアと非エンジニアの両方の意味で引けます。`;
 
 const jsonLd = [
   websiteNode(Astro.site),

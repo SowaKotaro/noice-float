@@ -36,7 +36,7 @@ import type { LucideIcon } from "lucide-react";
  *
  *   見出しチップ（アイコン＋語＋綴り）／読みチップ／本文／下段（透かし＋バッジ）
  *   ENGINEER … 本文＝エンジニア視点の説明
- *   GENERAL  … 本文＝ふつうの意味
+ *   GENERAL  … 本文＝非エンジニアの意味
  *
  * かつて ENGINEER 側のチップ列は 3 段階（さらっと / しっかり / がっつり）の
  * 切替ボタンだったが、説明を 1 本にまとめたのでなくなった。跡地は GENERAL と
@@ -120,7 +120,7 @@ const HEAD_SPELLING = "text-xs font-black tracking-wider text-white/60 sm:text-s
 const BODY_TEXT =
   "border-b-4 border-black/20 pb-2 text-sm leading-relaxed font-bold text-black sm:text-base";
 // 「要は」の 1 行。**ENGINEER カードにだけ出る**（2 枚の骨格を揃える方針の唯一の例外。
-// ふつう側の説明はもともと平たい言葉なので、言い直す相手が居ない）。
+// 非エンジニア側の説明はもともと平たい言葉なので、言い直す相手が居ない）。
 // 本文の `border-b-4` がそのまま本文との仕切りになるので、ここに罫線は足さない。
 // 本文が `font-bold` でこちらが `font-black` なのは、締めの言い切りだから。
 const GIST_TEXT = "mt-2 text-sm leading-relaxed font-black text-black sm:text-base";
@@ -280,7 +280,7 @@ export default function MeaningCards({
       {/* どちらが前面に来たかを読み上げる。カードは見た目でしか
           前後が分からないので、視覚以外にも伝わるようにしておく。 */}
       <p aria-live="polite" className="sr-only">
-        {engineerFront ? "エンジニア" : "ふつう"}の意味が前面です
+        {engineerFront ? "エンジニア" : "非エンジニア"}の意味が前面です
       </p>
 
       {examples.length > 0 && (
@@ -331,7 +331,7 @@ function Badge({
 
   const JA: Record<Side, string> = {
     engineer: "エンジニア",
-    general: "ふつう",
+    general: "非エンジニア",
   };
 
   return (
