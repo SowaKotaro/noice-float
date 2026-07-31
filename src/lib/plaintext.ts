@@ -45,7 +45,7 @@ export const wordToMarkdown = (
     lines.push("");
   }
 
-  lines.push(`${h}# ふつうに言う「${term}」（${general.spelling}）`, "");
+  lines.push(`${h}# 非エンジニアが言う「${term}」（${general.spelling}）`, "");
   lines.push(general.meaning, "");
   if (general.examples.length > 0) {
     lines.push("使う場面:", "");
@@ -69,7 +69,7 @@ export const siteIntro = (): string =>
     "",
     "同じ語がエンジニアと非エンジニアで別のものを指してしまう——という",
     "すれ違いを集めた辞書です。1 つの語について、エンジニア側の説明と",
-    "日常側の説明を 1 つずつ、そして両方の使用例を載せています。",
+    "非エンジニア側の説明を 1 つずつ、そして両方の使用例を載せています。",
     "",
   ].join("\n");
 

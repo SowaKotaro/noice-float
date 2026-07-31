@@ -84,7 +84,7 @@ const words = defineCollection({
       examples: z.array(z.string()).default([]),
     }),
 
-    /** 一般側は段階を持たず、意味ひとつ。 */
+    /** 非エンジニア側は段階を持たず、意味ひとつ。 */
     general: z.object({
       /** この視点で書くときの綴り。詳細は `engineer.spelling`。 */
       spelling: z.string(),
