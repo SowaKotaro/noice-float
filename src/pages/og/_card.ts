@@ -11,8 +11,8 @@
  * 説明文は OGP の description（＝`tldr`）が担当する。
  * この住み分けのおかげで、フォントは ASCII ＋ かな ＋ 固定文言だけで足りる。
  *
- * 見た目は `AGENTS.md` の紙面の語彙どおり（紫の下地・黒 8px 枠・
- * ぼかし 0 のオフセット影・ENGINEER は #4ECDC4／GENERAL は #FFD166）。
+ * 見た目は `AGENTS.md` の紙面の語彙どおり（白い方眼紙の下地・黒 8px 枠・
+ * ぼかし 0 のオフセット影・ENGINEER は #7FE3D4／GENERAL は #FFE66D）。
  */
 
 import { readFile } from "node:fs/promises";
@@ -32,9 +32,12 @@ const WIDTH = 1200;
 const HEIGHT = 630;
 
 const BLACK = "#000000";
-const VIOLET = "#C4B5FD";
-const ENGINEER = "#4ECDC4";
-const GENERAL = "#FFD166";
+/** サイトと同じ紙と罫線（`global.css` の `--background` / `--grid*`）。 */
+const PAPER = "#FFFDF7";
+const GRID = "#DBEAF6";
+const GRID_STRONG = "#B8D8EE";
+const ENGINEER = "#7FE3D4";
+const GENERAL = "#FFE66D";
 
 let fontCache: Buffer | null = null;
 
@@ -56,9 +59,7 @@ const font = async () => {
  * 豆腐は生成に成功してしまい画像を見るまで気付けないので、ビルドログに出す。
  */
 const warnMissingGlyphs = (text: string, where: string) => {
-  const covered = new Set(
-    (OG_FIXED_TEXT + "、。「」・！？…—〜／").split(""),
-  );
+  const covered = new Set((OG_FIXED_TEXT + "、。「」・！？…—〜／").split(""));
   const missing = [...new Set(text.split(""))].filter((ch) => {
     const code = ch.codePointAt(0)!;
     const isAscii = code >= 0x20 && code <= 0x7e;
@@ -139,7 +140,16 @@ const layout = (headline: string, sub: string | null) =>
       height: HEIGHT,
       flexDirection: "column",
       justifyContent: "space-between",
-      background: VIOLET,
+      // サイトと同じ方眼紙。ただし OGP はタイムラインで縮んで出るので、
+      // マスは画面（20px / 100px）の 2 倍に取って潰れないようにしてある。
+      backgroundColor: PAPER,
+      backgroundImage: [
+        `linear-gradient(to right, ${GRID_STRONG} 2px, transparent 2px)`,
+        `linear-gradient(to bottom, ${GRID_STRONG} 2px, transparent 2px)`,
+        `linear-gradient(to right, ${GRID} 2px, transparent 2px)`,
+        `linear-gradient(to bottom, ${GRID} 2px, transparent 2px)`,
+      ].join(", "),
+      backgroundSize: "200px 200px, 200px 200px, 40px 40px, 40px 40px",
       padding: 56,
       fontFamily: "Dela Gothic One",
     },
@@ -154,7 +164,8 @@ const layout = (headline: string, sub: string | null) =>
             ...paper("#FFFFFF", 12),
             padding: "14px 36px",
             // 語の長さで字を詰める。長い語でも 1 行に収める狙い。
-            fontSize: headline.length > 16 ? 54 : headline.length > 10 ? 72 : 104,
+            fontSize:
+              headline.length > 16 ? 54 : headline.length > 10 ? 72 : 104,
             color: BLACK,
           },
           headline,
@@ -192,9 +203,7 @@ const render = async (node: Node): Promise<Buffer> => {
   });
 
   return Buffer.from(
-    new Resvg(svg, { fitTo: { mode: "width", value: WIDTH } })
-      .render()
-      .asPng(),
+    new Resvg(svg, { fitTo: { mode: "width", value: WIDTH } }).render().asPng(),
   );
 };
 
