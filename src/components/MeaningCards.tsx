@@ -15,17 +15,20 @@ import type { LucideIcon } from "lucide-react";
 /**
  * 意味カード。`refs/NeoBrutalismCards.tsx` の見た目を踏襲している。
  *
- * 参考のまま：配色（#4ECDC4 / #FFD166 / 黒枠・白面）、影のオフセット
+ * 参考のまま：黒枠・白面、影のオフセット
  * （前面 10px・ホバー 14px・背面 4px・チップ 2px）、前後の位置差
  * （背面は右下へ 4/6 ＋ rotate-3）、イージング
  * （duration-500 / cubic-bezier(0.34,1.56,0.64,1)）、上に飛び出すタブ、
  * 黒帯の見出しチップ、白チップ、下段の透かしとバッジ。
  *
- * 参考から変えた点は 3 つだけ（いずれもユーザー指示）。
+ * 参考から変えた点は 4 つだけ（いずれもユーザー指示）。
  *   1. 寸法を一回り大きく（320px / sm 560px 幅、高さは下限のみ）
  *   2. 2 枚を absolute ではなく**グリッドの同じセルに重ねる**。セルの高さが
  *      背の高い方に合うので、本文が長くてもカードが伸びる＝スクロールバーが出ない
  *   3. タブは角丸をやめて**付箋**に（角ばった形・少し傾ける・影で浮かせる）
+ *   4. 面の色は付箋のパステル（ENGINEER #7FE3D4 / GENERAL #FFE66D）。
+ *      サイト全体が白い方眼紙＋ポストイットの見立てなので、参考の
+ *      #4ECDC4 / #FFD166 より明度を上げてある（`global.css` の頭に一覧）
  *
  * **2 枚は同じ骨格**（参考の ENGINEER カード側）で、違うのは色・付箋・アイコン・
  * 綴り・本文だけ。構造は下の `card()` 一か所で描いているので、
@@ -62,13 +65,13 @@ interface CardStyle {
 
 const CARDS: Record<Side, CardStyle> = {
   engineer: {
-    bg: "bg-[#4ECDC4]",
+    bg: "bg-[#7FE3D4]",
     label: "ENGINEER",
     tab: "right-5 sm:right-8 rotate-[2deg]",
     icon: Terminal,
   },
   general: {
-    bg: "bg-[#FFD166]",
+    bg: "bg-[#FFE66D]",
     label: "GENERAL",
     tab: "left-5 sm:left-8 rotate-[-2deg]",
     icon: Smile,

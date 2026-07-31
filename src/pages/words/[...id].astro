@@ -76,7 +76,7 @@ const updated = lastModified(word);
     {/* 一行の言い切り。meta description・OGP・JSON-LD と同じ文言を、
         ページの本文としても出しておく（AI が引用するのはこの形の文）。 */}
     <p
-      class="mx-auto mt-14 max-w-[560px] border-4 border-l-[12px] border-black border-l-[#FF6B6B] bg-white px-5 py-4 leading-relaxed font-bold text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+      class="mx-auto mt-14 max-w-[560px] border-4 border-l-[12px] border-black border-l-[#FF9EBB] bg-white px-5 py-4 leading-relaxed font-bold text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
     >
       {word.data.tldr}
     </p>
@@ -92,7 +92,7 @@ const updated = lastModified(word);
                 class:list={[
                   "inline-block border-2 border-black px-2 py-0.5 text-xs font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:text-sm",
                   // タグの色を分野の世界に合わせる。tech=青緑／daily=黄。
-                  TAGS[tag].world === "tech" ? "bg-[#4ECDC4]" : "bg-[#FFD166]",
+                  TAGS[tag].world === "tech" ? "bg-[#7FE3D4]" : "bg-[#FFE66D]",
                 ]}
               >
                 #{tag}

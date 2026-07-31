@@ -15,7 +15,7 @@
  * したがって**カードの表示と内容が重複するのは意図的**。上が体験、ここが記録。
  *
  * 見た目は `AGENTS.md` の紙面の語彙どおり（黒 4px 枠・オフセット影・
- * 傾けた黒ラベル・ENGINEER は #4ECDC4／GENERAL は #FFD166）。
+ * 傾けた黒ラベル・ENGINEER は #7FE3D4／GENERAL は #FFE66D）。
  */
 // client: 指定なしで置くと、Astro がビルド時に静的な SVG へ描き切る
 // （React ランタイムはこのページのぶんには載らない）。
@@ -42,7 +42,7 @@ const SPELL = "text-xs font-black tracking-wider text-black/50 sm:text-sm";
 
   <div class={`mt-6 ${PAPER}`}>
     {/* エンジニア側。説明 1 本と用例。 */}
-    <h3 class={`${HEAD} bg-[#4ECDC4]`}>
+    <h3 class={`${HEAD} bg-[#7FE3D4]`}>
       <Terminal size={22} aria-hidden="true" />
       エンジニアの「{term}」
       <span class={SPELL}>{engineer.spelling}</span>
@@ -74,7 +74,7 @@ const SPELL = "text-xs font-black tracking-wider text-black/50 sm:text-sm";
     </div>
 
     {/* ふつう側。骨格はエンジニア側と揃える（色と中身だけが違う）。 */}
-    <h3 class={`${HEAD} border-t-4 bg-[#FFD166]`}>
+    <h3 class={`${HEAD} border-t-4 bg-[#FFE66D]`}>
       <Smile size={22} aria-hidden="true" />
       ふつうの「{term}」
       <span class={SPELL}>{general.spelling}</span>

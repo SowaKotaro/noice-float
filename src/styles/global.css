@@ -85,13 +85,22 @@
 }
 
 /*
- * パレットは `refs/NeoBrutalismCards.tsx` の配色をそのまま採用している。
- * 紫 violet-300 #C4B5FD（下地）/ 青緑 #4ECDC4（エンジニア）/ 黄 #FFD166（ふつう）/
- * 赤 #FF6B6B（差し色）/ 枠線と文字は純黒 #000000 / 面は純白 #FFFFFF。
- * ドットは参考どおり #00000033 を 20px 間隔。
+ * パレットは**白い方眼紙のノートに、ポストイットを貼った**見立て（ユーザー指示）。
+ * 紙 #FFFDF7（ほぼ白・わずかに温かい）/ 罫線は青 / 面は付箋のパステル /
+ * 枠線と文字は純黒 #000000。
  *
- * ※ 以前はタイトルロゴ（ネイビー/ピンク/黄緑）から抽出した色を使っていたが、
- *   「参考をそのまま真似する」方針に切り替えたため差し替えた。
+ * 付箋の 4 色（この 4 つ以外の色を足さないこと）
+ *   ミント  #7FE3D4 … ENGINEER
+ *   カナリア #FFE66D … GENERAL
+ *   ピンク  #FF9EBB … 差し色（primary / destructive）
+ *   ラベンダー #D7C3FA … 5 色目の面（一覧のマスなど）
+ *
+ * どれも黒文字が乗る前提の明るいパステルなので、`*-foreground` は純黒に寄せてある
+ * （赤 #FF6B6B に白字を乗せていた頃の名残で白を残すとコントラストが落ちる）。
+ *
+ * ※ もとは `refs/NeoBrutalismCards.tsx` の配色（紫の下地 #C4B5FD ＋ 青緑 #4ECDC4 ＋
+ *   黄 #FFD166 ＋ 赤 #FF6B6B）をそのまま使っていた。**配色と背景だけ**この
+ *   ノート＋付箋に差し替えてある（ユーザー指示）。寸法・影・傾き・骨格は参考のまま。
  */
 :root {
   /* 本文フォントは暫定。見出し用の自己ホストは docs/progress.md の未着手 4 番。 */
@@ -102,37 +111,42 @@
   /* タイトルロゴだけが使う。フォールバックは太めの指定に寄せてある。 */
   --font-logo: "Dela Gothic One Subset", var(--font-sans);
 
-  --background: #c4b5fd;
+  /* 紙。純白にしないのは、白い付箋・白いカードを紙から浮かせるため。 */
+  --background: #fffdf7;
   --foreground: #000000;
   --card: #ffffff;
   --card-foreground: #000000;
   --popover: #ffffff;
   --popover-foreground: #000000;
 
-  --primary: #ff6b6b;
-  --primary-foreground: #ffffff;
-  --primary-hover: #f25555;
+  --primary: #ff9ebb;
+  --primary-foreground: #000000;
+  --primary-hover: #ff87ab;
   --secondary: #000000;
   --secondary-foreground: #ffffff;
   --secondary-hover: #1a1a1a;
 
-  --muted: #ddd6fe;
-  --muted-foreground: #3f3a52;
-  --accent: #4ecdc4;
+  --muted: #d7c3fa;
+  --muted-foreground: #443a5c;
+  --accent: #7fe3d4;
   --accent-foreground: #000000;
-  --accent-hover: #3bb8af;
-  --destructive: #ff6b6b;
-  --destructive-foreground: #ffffff;
+  --accent-hover: #63dbc9;
+  --destructive: #ff9ebb;
+  --destructive-foreground: #000000;
 
   --border: #000000;
   --input: #ffffff;
   --ring: #000000;
 
-  --engineer: #4ecdc4;
-  --general: #ffd166;
+  --engineer: #7fe3d4;
+  --general: #ffe66d;
 
-  /* 背景に敷くドット。参考の #00000033 をそのまま。 */
-  --dot: #00000033;
+  /*
+   * 方眼の罫線。ノートの見立てなので**青**で、紙の上に直接引く（黒の透過ではない）。
+   * 細線は 20px ごと、太線は 5 マス（100px）ごと。
+   */
+  --grid: #dbeaf6;
+  --grid-strong: #b8d8ee;
 }
 
 .dark {
@@ -165,7 +179,8 @@
   --engineer: #4d6b1a;
   --general: #7a2b52;
 
-  --dot: color-mix(in srgb, var(--border) 10%, transparent);
+  --grid: color-mix(in srgb, var(--border) 6%, transparent);
+  --grid-strong: color-mix(in srgb, var(--border) 12%, transparent);
 }
 
 @layer base {
@@ -173,12 +188,24 @@
     @apply border-border outline-ring/50;
   }
   /*
-   * 紙面ではなく「方眼のドット」の上に書類（カード）を置く、という画面構成。
-   * ネオブルータリズムの定番で、カードのオフセット影が浮いて見える効果がある。
+   * 紙面ではなく「方眼紙」の上に書類（カード）を置く、という画面構成。
+   * カードのオフセット影が浮いて見えるのはこの下敷きのおかげ。
+   *
+   * 4 枚重ねている。上 2 枚が 5 マスごとの太線、下 2 枚が 20px の細線で、
+   * 太線を先に書いているので交点では太線が勝つ。線幅は 1px 固定
+   * （太線を 2px にすると拡大時に滲むので、太さではなく濃さで差を付けている）。
    */
   body {
     @apply bg-background text-foreground font-sans;
-    background-image: radial-gradient(var(--dot) 1px, transparent 1px);
-    background-size: 20px 20px;
+    background-image:
+      linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px),
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+    background-size:
+      100px 100px,
+      100px 100px,
+      20px 20px,
+      20px 20px;
   }
 }
